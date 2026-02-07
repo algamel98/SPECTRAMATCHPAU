@@ -10,10 +10,10 @@ from PIL import Image
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(SCRIPT_DIR)
 
-# Source PNG (prefer high-res 1024x1024 logo for sharp icons)
-src = os.path.join(PROJECT_DIR, 'static', 'images', 'logo_square_no_name_1024x1024.png')
+# Source PNG — deslogo.png is the official app icon (3D rendered, looks great at all sizes)
+src = os.path.join(PROJECT_DIR, 'static', 'images', 'deslogo.png')
 if not os.path.exists(src):
-    src = os.path.join(PROJECT_DIR, 'static', 'images', 'deslogo.png')
+    src = os.path.join(PROJECT_DIR, 'static', 'images', 'logo_square_no_name_1024x1024.png')
 
 if not os.path.exists(src):
     print(f"[ERROR] No source logo found at: {src}")

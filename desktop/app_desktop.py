@@ -33,17 +33,14 @@ if PROJECT_DIR not in sys.path:
 
 # ── Resolve paths ─────────────────────────────────────────────────
 STATIC_DIR = os.path.join(PROJECT_DIR, 'static')
-# Prefer .ico (multi-resolution, sharpest on Windows), then high-res PNG
+# Icon: prefer .ico generated from deslogo.png (multi-res, sharpest on Windows)
 ICO_PATH = os.path.join(PROJECT_DIR, 'installer', 'spectramatch.ico')
-LOGO_HIRES = os.path.join(STATIC_DIR, 'images', 'logo_square_no_name_1024x1024.png')
-LOGO_FALLBACK = os.path.join(STATIC_DIR, 'images', 'deslogo.png')
+LOGO_PATH = os.path.join(STATIC_DIR, 'images', 'deslogo.png')
 
 if os.path.exists(ICO_PATH):
     ICON_PATH = ICO_PATH
-elif os.path.exists(LOGO_HIRES):
-    ICON_PATH = LOGO_HIRES
 else:
-    ICON_PATH = LOGO_FALLBACK
+    ICON_PATH = LOGO_PATH
 
 SPLASH_HTML = os.path.join(DESKTOP_DIR, 'splash.html')
 
@@ -159,7 +156,6 @@ def main():
         min_size=(1024, 700),
         text_select=True,
         zoomable=True,
-        icon=ICON_PATH,
     )
 
     # Give the API object a reference to the window
@@ -187,6 +183,7 @@ def main():
     webview.start(
         debug=('--dev' in sys.argv),
         gui='edgechromium',          # Use Edge/Chromium backend on Windows
+        icon=ICON_PATH,
     )
 
 
