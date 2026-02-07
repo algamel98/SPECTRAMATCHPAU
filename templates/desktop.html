@@ -24,6 +24,8 @@
                     <div class="menu-divider"></div>
                     <div class="menu-action" data-action="delete-images"><span class="menu-shortcut-label" data-i18n="menu.delete.all">Delete All Images</span><span class="menu-shortcut">Ctrl+D</span></div>
                     <div class="menu-divider"></div>
+                    <div class="menu-action" data-action="reset-default" data-i18n="reset.title">Reset to Default</div>
+                    <div class="menu-divider"></div>
                     <div class="menu-action" data-action="exit" data-i18n="menu.exit">Exit</div>
                 </div>
             </div>
@@ -184,6 +186,10 @@
             </button>
             <button class="tb-btn tb-icon-btn" id="tbFeedback" title="Send Feedback">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </button>
+            <button class="tb-btn tb-reset-btn" id="tbReset" title="Reset to Default" onclick="Desktop.resetToDefault()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+                <span data-i18n="tb.reset">Reset</span>
             </button>
         </div>
     </div>

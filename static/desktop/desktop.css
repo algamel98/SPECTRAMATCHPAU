@@ -2263,6 +2263,20 @@ select option {
     padding: 4px 6px !important;
 }
 
+.tb-reset-btn {
+    color: var(--error, #f44747) !important;
+    border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.tb-reset-btn:hover {
+    background: var(--error-bg, rgba(244,71,71,0.12));
+    border-color: var(--error, #f44747);
+    color: var(--error, #f44747) !important;
+}
+.tb-reset-btn svg {
+    stroke: var(--error, #f44747);
+}
+
 /* ═══════════════════════════════════════════════════════════
    STATUS BAR — Center / Copyright
    ═══════════════════════════════════════════════════════════ */

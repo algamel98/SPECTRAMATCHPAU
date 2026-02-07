@@ -81,6 +81,7 @@ var T={en:{
 'about.feat4':'CIE Standard Illuminants (D65, D50, TL84)',
 'menu.shortcuts':'Keyboard Shortcuts','sc.close.dialogs':'Close all dialogs',
 'confirm.delete.title':'Delete All Images','confirm.delete.msg':'Are you sure you want to delete all uploaded images? This action cannot be undone.',
+'tb.reset':'Reset','reset.title':'Reset to Default','reset.msg':'This will reset ALL settings, clear all images, and return the application to its initial first-run state. Are you sure?','reset.done':'Application reset to default state',
 'error.no.sample':'Please upload a sample image first.','error.no.both':'Please upload both reference and sample images first.',
 'feedback.sent':'Feedback sent successfully!','feedback.empty':'Please enter a message.',
 'mode.single':'Single Image','mode.dual':'Dual Image','color.score':'Color Score','pattern.score':'Pattern Score','overall.score':'Overall Score',
@@ -180,6 +181,7 @@ var T={en:{
 'about.feat4':'CIE Standart Aydınlatmalar (D65, D50, TL84)',
 'menu.shortcuts':'Klavye Kısayolları','sc.close.dialogs':'Tüm diyalogları kapat',
 'confirm.delete.title':'Tüm Görüntüleri Sil','confirm.delete.msg':'Tüm görüntüleri silmek istediğinizden emin misiniz?',
+'tb.reset':'Sıfırla','reset.title':'Varsayılana Sıfırla','reset.msg':'Bu işlem TÜM ayarları sıfırlayacak, tüm görüntüleri temizleyecek ve uygulamayı ilk açılış durumuna döndürecektir. Emin misiniz?','reset.done':'Uygulama varsayılan duruma sıfırlandı',
 'error.no.sample':'Lütfen önce bir örnek görüntü yükleyin.','error.no.both':'Lütfen önce her iki görüntüyü de yükleyin.',
 'feedback.sent':'Geri bildirim gönderildi!','feedback.empty':'Lütfen bir mesaj girin.',
 'mode.single':'Tek Görüntü','mode.dual':'Çift Görüntü','color.score':'Renk Skoru','pattern.score':'Desen Skoru','overall.score':'Genel Skor',
@@ -259,7 +261,14 @@ document.addEventListener('DOMContentLoaded',function(){
     initBottomTabs();initKeyboard();initTheme();initLang();
     initDialogs();initSampling();initPointSelector();
     initRegionOverlays();initRegionDrag();initPanelControls();initPanelResize();
-    updateUI();
+    /* Restore persisted state (after all UI is initialized) */
+    var restored=restoreState();
+    if(restored){log('Session restored','info');}
+    updateUI();updateRegionOverlays();updateSamplingUI();
+    /* Wire auto-save to property inputs */
+    document.querySelectorAll('#panelProperties input, #panelProperties select').forEach(function(el){
+        el.addEventListener('change',scheduleSave);
+    });
 });
 
 /* ═══ Theme ═══ */
@@ -269,6 +278,7 @@ function initTheme(){
         document.body.setAttribute('data-theme',State.theme);
         localStorage.setItem('desk_theme',State.theme);
         log('Theme: '+State.theme,'info');
+        scheduleSave();
     });
 }
 
@@ -280,6 +290,7 @@ function initLang(){
         localStorage.setItem('desk_lang',State.lang);
         translatePage();updateUI();
         log('Language: '+(State.lang==='en'?'English':'Türkçe'),'info');
+        scheduleSave();
     });
 }
 
@@ -314,6 +325,7 @@ function handleMenu(cmd){
         case 'delete-images':confirmDelete();break;
         case 'run':runAnalysis();break;
         case 'reset-settings':resetSettings();break;
+        case 'reset-default':resetToDefault();break;
         case 'toggle-workspace':togglePanel('panelWorkspace');break;
         case 'toggle-properties':togglePanel('panelProperties');break;
         case 'toggle-console':togglePanel('bottomPanel');break;
@@ -337,6 +349,7 @@ function togglePanel(id){
     if(id==='panelProperties'&&$('resizeProperties'))$('resizeProperties').style.display=isHidden?'none':'';
     /* Redraw region overlays after layout change */
     setTimeout(function(){if(!State.fullImage)updateRegionOverlays();},50);
+    scheduleSave();
 }
 
 /* ═══ Toolbar ═══ */
@@ -359,13 +372,13 @@ function initToolbar(){
         State.fullImage=savedFullImage;
         $('tbFullImage').checked=savedFullImage;
         $('tbRegionControls').classList.toggle('hidden',State.fullImage);
-        updateUI();
+        updateUI();scheduleSave();
     });
     $('tbFullImage').addEventListener('change',function(){
         State.fullImage=this.checked;
         $('tbRegionControls').classList.toggle('hidden',State.fullImage);
         log('Region: '+(State.fullImage?t('tb.full.image'):'Custom'),'info');
-        updateRegionOverlays();updateUI();
+        updateRegionOverlays();updateUI();scheduleSave();
     });
     $('tbShape').addEventListener('change',function(){
         var v=this.value, isRect=v==='rectangle', isPen=v==='pen';
@@ -383,6 +396,7 @@ function initToolbar(){
         updateRegionOverlays();
         checkPointsAfterRegionChange();
         log('Shape: '+t(v),'info');
+        scheduleSave();
     });
     var sync=function(sId,nId){
         $(sId).addEventListener('input',function(){$(nId).value=this.value;updateRegionOverlays();checkPointsAfterRegionChange();});
@@ -451,6 +465,7 @@ function loadImage(which,file){
             updateRegionOverlays();
             updateUI();
             log('Loaded '+which+': '+file.name+' ('+w+'x'+h+')','success');
+            scheduleSave();
         };img.src=e.target.result;
     };reader.readAsDataURL(file);
 }
@@ -497,6 +512,7 @@ function clampAndSyncInput(sliderId,inputId){
     if(v>mx)v=mx;
     inp.value=v;slider.value=v;
     updateRegionOverlays();checkPointsAfterRegionChange();
+    scheduleSave();
 }
 
 /* ═══ Region Center Management ═══ */
@@ -591,6 +607,7 @@ function onViewerMouseDown(e,which){
     clampRegionCenter();
     updateRegionOverlays();
     log('Region center set: ('+State.regionCenterX+', '+State.regionCenterY+')','info');
+    scheduleSave();
 }
 var _penWhich=null;
 var PEN_CLOSE_DIST=15; /* pixel distance to auto-close the loop */
@@ -628,6 +645,7 @@ function _penMouseUp(e){
         State.penClosed=true;
         updateRegionOverlays();
         log(t('pen.complete'),'success');
+        scheduleSave();
     }else{
         /* Not closed — warn user */
         State.penClosed=false;
@@ -829,6 +847,7 @@ function doDeleteAll(){
     $('wsDownloads').innerHTML='<div class="ws-download-empty">'+t('ws.no.reports')+'</div>';
     $('resultsArea').innerHTML='<div class="results-empty">'+t('results.empty')+'</div>';
     updateRegionOverlays();updateSamplingUI();log(t('menu.delete.all'),'warn');updateUI();
+    scheduleSave();
 }
 
 /* ═══ Feedback ═══ */
@@ -1008,6 +1027,7 @@ function completeRandomly(){
     }
     State.samplingMode=m>0?'hybrid':'random';
     updateSamplingUI();log('Generated '+State.randomPoints.length+' random points','info');
+    scheduleSave();
 }
 
 /* ═══ Point Selector ═══ */
@@ -1723,6 +1743,7 @@ function resetSettings(){
     $('tbRegionControls').classList.add('hidden');
     resetRegionCenter();updateRegionOverlays();updateSamplingUI();
     log('All settings reset to defaults','warn');
+    scheduleSave();
 }
 
 /* ═══ Panel Hide Buttons ═══ */
@@ -1787,6 +1808,7 @@ function initPanelResize(){
             document.body.style.cursor='';
             document.body.style.userSelect='';
             target=null;
+            scheduleSave();
         }
     });
 }
@@ -1875,12 +1897,192 @@ function initRegionDrag(){
                 parent.style.cursor='';
                 document.body.style.userSelect='';
                 log('Region moved to ('+State.regionCenterX+', '+State.regionCenterY+')','info');
+                scheduleSave();
             }
         });
     });
 }
 
+/* ═══ Persistence — save/restore full app state to localStorage ═══ */
+var PERSIST_KEY='spectramatch_desktop_state';
+
+function saveState(){
+    try{
+        var s={
+            /* Language & Theme */
+            lang:State.lang, theme:State.theme,
+            /* Mode & Region */
+            singleMode:State.singleMode, fullImage:State.fullImage,
+            shape:$('tbShape')?$('tbShape').value:'circle',
+            sizeVal:$('tbSizeValue')?$('tbSizeValue').value:'100',
+            heightVal:$('tbHeightValue')?$('tbHeightValue').value:'100',
+            regionCenterX:State.regionCenterX, regionCenterY:State.regionCenterY,
+            samplingMode:State.samplingMode,
+            manualPoints:State.manualPoints, randomPoints:State.randomPoints,
+            penPoints:State.penPoints, penClosed:State.penClosed,
+            /* Images (dataURL) */
+            refDataUrl:State.refDataUrl, sampleDataUrl:State.sampleDataUrl,
+            refW:State.refW, refH:State.refH, sampleW:State.sampleW, sampleH:State.sampleH,
+            refName:State.refFile?State.refFile.name:null,
+            sampleName:State.sampleFile?State.sampleFile.name:null,
+            /* Panel visibility */
+            panelWorkspaceHidden:$('panelWorkspace')?$('panelWorkspace').classList.contains('hidden'):false,
+            panelPropertiesHidden:$('panelProperties')?$('panelProperties').classList.contains('hidden'):false,
+            bottomPanelHidden:$('bottomPanel')?$('bottomPanel').classList.contains('hidden'):false,
+            /* Panel sizes */
+            panelWorkspaceW:$('panelWorkspace')?$('panelWorkspace').style.width:'',
+            panelPropertiesW:$('panelProperties')?$('panelProperties').style.width:'',
+            bottomPanelH:$('bottomPanel')?$('bottomPanel').style.height:'',
+            /* Properties / Settings */
+            propOperator:$('propOperator')?$('propOperator').value:'Operator',
+            propTimezone:$('propTimezone')?$('propTimezone').value:'3',
+            propReportLang:$('propReportLang')?$('propReportLang').value:'en',
+            propColorPass:$('propColorPass')?$('propColorPass').value:'2.0',
+            propColorCond:$('propColorCond')?$('propColorCond').value:'5.0',
+            propColorGlobal:$('propColorGlobal')?$('propColorGlobal').value:'5.0',
+            propCsiGood:$('propCsiGood')?$('propCsiGood').value:'90.0',
+            propCsiWarn:$('propCsiWarn')?$('propCsiWarn').value:'70.0',
+            propRegionCount:$('propRegionCount')?$('propRegionCount').value:'5',
+            propPointsCount:$('propPointsCount')?$('propPointsCount').value:'5',
+            propSamplingMode:$('propSamplingMode')?$('propSamplingMode').value:'random',
+            propIlluminant:$('propIlluminant')?$('propIlluminant').value:'D65',
+            propSsimPass:$('propSsimPass')?$('propSsimPass').value:'85.0',
+            propSsimCond:$('propSsimCond')?$('propSsimCond').value:'70.0',
+            propGradPass:$('propGradPass')?$('propGradPass').value:'85.0',
+            propGradCond:$('propGradCond')?$('propGradCond').value:'70.0',
+            propPhasePass:$('propPhasePass')?$('propPhasePass').value:'85.0',
+            propPhaseCond:$('propPhaseCond')?$('propPhaseCond').value:'70.0',
+            propPatternGlobal:$('propPatternGlobal')?$('propPatternGlobal').value:'75.0',
+            propLabDL:$('propLabDL')?$('propLabDL').value:'1.0',
+            propLabDA:$('propLabDA')?$('propLabDA').value:'1.0',
+            propLabDB:$('propLabDB')?$('propLabDB').value:'1.0',
+            propLabMag:$('propLabMag')?$('propLabMag').value:'2.0',
+            propColorScoringMethod:$('propColorScoringMethod')?$('propColorScoringMethod').value:'delta_e',
+            propPatternScoringMethod:$('propPatternScoringMethod')?$('propPatternScoringMethod').value:'all',
+            propStructuralPass:$('propStructuralPass')?$('propStructuralPass').value:'85.0',
+            propStructuralCond:$('propStructuralCond')?$('propStructuralCond').value:'70.0',
+            /* Checkboxes */
+            checkboxes:{}
+        };
+        document.querySelectorAll('.prop-check-list input[type="checkbox"],.prop-check-grid input[type="checkbox"]').forEach(function(cb){
+            if(cb.id)s.checkboxes[cb.id]=cb.checked;
+        });
+        /* Test illuminants */
+        s.testIlluminants=[];
+        document.querySelectorAll('input[name="propTestIll"]:checked').forEach(function(e){s.testIlluminants.push(e.value);});
+        localStorage.setItem(PERSIST_KEY,JSON.stringify(s));
+    }catch(e){/* quota exceeded or private mode — silently ignore */}
+}
+
+function restoreState(){
+    try{
+        var raw=localStorage.getItem(PERSIST_KEY);
+        if(!raw)return false;
+        var s=JSON.parse(raw);
+
+        /* Language & Theme */
+        if(s.lang){State.lang=s.lang;localStorage.setItem('desk_lang',s.lang);}
+        if(s.theme){State.theme=s.theme;localStorage.setItem('desk_theme',s.theme);}
+        document.body.setAttribute('data-theme',State.theme);
+        $('langCode').textContent=State.lang.toUpperCase();
+
+        /* Mode */
+        State.singleMode=!!s.singleMode;
+        State.fullImage=s.fullImage!==false;
+        if($('tbSingleMode'))$('tbSingleMode').checked=State.singleMode;
+        if($('tbFullImage'))$('tbFullImage').checked=State.fullImage;
+        if($('tbRegionControls'))$('tbRegionControls').classList.toggle('hidden',State.fullImage);
+
+        /* Shape & Size */
+        if(s.shape&&$('tbShape')){$('tbShape').value=s.shape;$('tbRectGroup').style.display=s.shape==='rectangle'?'':'none';}
+        if(s.sizeVal){$('tbSizeSlider').value=s.sizeVal;$('tbSizeValue').value=s.sizeVal;}
+        if(s.heightVal){$('tbHeightSlider').value=s.heightVal;$('tbHeightValue').value=s.heightVal;}
+        State.regionCenterX=s.regionCenterX||0;
+        State.regionCenterY=s.regionCenterY||0;
+        State.samplingMode=s.samplingMode||'random';
+        State.manualPoints=s.manualPoints||[];
+        State.randomPoints=s.randomPoints||[];
+        State.penPoints=s.penPoints||[];
+        State.penClosed=!!s.penClosed;
+
+        /* Restore images from dataURL */
+        if(s.refDataUrl){
+            State.refDataUrl=s.refDataUrl;State.refW=s.refW||0;State.refH=s.refH||0;
+            /* Recreate File object from dataURL */
+            State.refFile=dataUrlToFile(s.refDataUrl,s.refName||'reference.png');
+            showPreview('ref',s.refDataUrl,s.refW,s.refH,s.refName||'reference.png');
+        }
+        if(s.sampleDataUrl){
+            State.sampleDataUrl=s.sampleDataUrl;State.sampleW=s.sampleW||0;State.sampleH=s.sampleH||0;
+            State.sampleFile=dataUrlToFile(s.sampleDataUrl,s.sampleName||'sample.png');
+            showPreview('sample',s.sampleDataUrl,s.sampleW,s.sampleH,s.sampleName||'sample.png');
+        }
+
+        /* Panel visibility */
+        if(s.panelWorkspaceHidden)togglePanel('panelWorkspace');
+        if(s.panelPropertiesHidden)togglePanel('panelProperties');
+        if(s.bottomPanelHidden)togglePanel('bottomPanel');
+
+        /* Panel sizes */
+        if(s.panelWorkspaceW&&$('panelWorkspace'))$('panelWorkspace').style.width=s.panelWorkspaceW;
+        if(s.panelPropertiesW&&$('panelProperties'))$('panelProperties').style.width=s.panelPropertiesW;
+        if(s.bottomPanelH&&$('bottomPanel'))$('bottomPanel').style.height=s.bottomPanelH;
+
+        /* Properties / Settings */
+        var fields=['propOperator','propTimezone','propReportLang','propColorPass','propColorCond',
+            'propColorGlobal','propCsiGood','propCsiWarn','propRegionCount','propPointsCount',
+            'propSamplingMode','propIlluminant','propSsimPass','propSsimCond','propGradPass',
+            'propGradCond','propPhasePass','propPhaseCond','propPatternGlobal',
+            'propLabDL','propLabDA','propLabDB','propLabMag',
+            'propColorScoringMethod','propPatternScoringMethod',
+            'propStructuralPass','propStructuralCond'];
+        fields.forEach(function(f){if(s[f]!==undefined&&$(f))$(f).value=s[f];});
+
+        /* Checkboxes */
+        if(s.checkboxes){
+            for(var id in s.checkboxes){if($(id))$(id).checked=s.checkboxes[id];}
+        }
+        /* Test illuminants */
+        if(s.testIlluminants){
+            document.querySelectorAll('input[name="propTestIll"]').forEach(function(cb){
+                cb.checked=s.testIlluminants.indexOf(cb.value)>=0;
+            });
+        }
+
+        return true;
+    }catch(e){return false;}
+}
+
+function dataUrlToFile(dataUrl,name){
+    try{
+        var arr=dataUrl.split(','),mime=arr[0].match(/:(.*?);/)[1];
+        var bstr=atob(arr[1]),n=bstr.length,u8=new Uint8Array(n);
+        while(n--)u8[n]=bstr.charCodeAt(n);
+        return new File([u8],name||'image.png',{type:mime});
+    }catch(e){return null;}
+}
+
+/* Auto-save on any meaningful change — debounced */
+var _saveTimer=null;
+function scheduleSave(){
+    if(_saveTimer)clearTimeout(_saveTimer);
+    _saveTimer=setTimeout(saveState,500);
+}
+
+/* ═══ Reset to Default ═══ */
+function resetToDefault(){
+    showConfirm(t('reset.title'),t('reset.msg'),'🔄',function(){
+        /* Clear all persisted state */
+        localStorage.removeItem(PERSIST_KEY);
+        localStorage.removeItem('desk_lang');
+        localStorage.removeItem('desk_theme');
+        /* Reload the page — returns to first-run state */
+        window.location.reload();
+    });
+}
+
 /* ═══ Public API (for inline onclick) ═══ */
 return {closeAlert:function(){$('alertDialog').style.display='none';},
-        saveAs:saveAsDownload};
+        saveAs:saveAsDownload,
+        resetToDefault:resetToDefault};
 })();
