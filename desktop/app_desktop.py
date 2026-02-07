@@ -19,16 +19,31 @@ import tempfile
 import urllib.request
 
 # ── Ensure parent project is on sys.path ──────────────────────────
-DESKTOP_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_DIR = os.path.dirname(DESKTOP_DIR)
+# When frozen by PyInstaller, _MEIPASS holds the temp extraction folder
+if getattr(sys, 'frozen', False):
+    BUNDLE_DIR = sys._MEIPASS
+    DESKTOP_DIR = os.path.join(BUNDLE_DIR, 'desktop')
+    PROJECT_DIR = BUNDLE_DIR
+else:
+    DESKTOP_DIR = os.path.dirname(os.path.abspath(__file__))
+    PROJECT_DIR = os.path.dirname(DESKTOP_DIR)
+
 if PROJECT_DIR not in sys.path:
     sys.path.insert(0, PROJECT_DIR)
 
 # ── Resolve paths ─────────────────────────────────────────────────
 STATIC_DIR = os.path.join(PROJECT_DIR, 'static')
-LOGO_PATH = os.path.join(STATIC_DIR, 'images', 'deslogo.png')
-LOGO_FALLBACK = os.path.join(STATIC_DIR, 'images', 'logo_square_no_name_1024x1024.png')
-ICON_PATH = LOGO_PATH if os.path.exists(LOGO_PATH) else LOGO_FALLBACK
+# Prefer .ico (multi-resolution, sharpest on Windows), then high-res PNG
+ICO_PATH = os.path.join(PROJECT_DIR, 'installer', 'spectramatch.ico')
+LOGO_HIRES = os.path.join(STATIC_DIR, 'images', 'logo_square_no_name_1024x1024.png')
+LOGO_FALLBACK = os.path.join(STATIC_DIR, 'images', 'deslogo.png')
+
+if os.path.exists(ICO_PATH):
+    ICON_PATH = ICO_PATH
+elif os.path.exists(LOGO_HIRES):
+    ICON_PATH = LOGO_HIRES
+else:
+    ICON_PATH = LOGO_FALLBACK
 
 SPLASH_HTML = os.path.join(DESKTOP_DIR, 'splash.html')
 
@@ -144,6 +159,7 @@ def main():
         min_size=(1024, 700),
         text_select=True,
         zoomable=True,
+        icon=ICON_PATH,
     )
 
     # Give the API object a reference to the window

@@ -30,5 +30,12 @@ Desktop.ini
 *.bak
 *.log
 
+# Installer build artifacts
+installer/output/
+installer/*.ico
+installer/*.bmp
+dist/
+build/
+
 # Byte-compiled
 *.pyc

@@ -157,6 +157,43 @@ def index():
 def desktop_ui():
     return render_template('desktop.html')
 
+@app.route('/download/desktop')
+def download_desktop_installer():
+    """Serve the Windows desktop installer (.exe).
+    
+    The installer file is expected at:
+      installer/output/SpectraMatch_Setup_2.2.1.exe
+    
+    If the file hasn't been built yet, returns a helpful 404 page.
+    For production, you can replace this with a redirect to an
+    external URL (GitHub Releases, CDN, etc.) by changing the
+    DESKTOP_INSTALLER_URL environment variable.
+    """
+    # Option A: Redirect to external URL if configured
+    external_url = os.environ.get('DESKTOP_INSTALLER_URL')
+    if external_url:
+        from flask import redirect
+        return redirect(external_url)
+    
+    # Option B: Serve the file directly from the installer/output folder
+    installer_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'installer', 'output')
+    installer_name = 'SpectraMatch_Setup_2.2.1.exe'
+    installer_path = os.path.join(installer_dir, installer_name)
+    
+    if os.path.exists(installer_path):
+        return send_file(
+            installer_path,
+            as_attachment=True,
+            download_name=installer_name,
+            mimetype='application/octet-stream'
+        )
+    else:
+        return jsonify({
+            'error': 'Installer not yet available',
+            'message': 'The desktop installer has not been built yet. '
+                       'Run installer/build_installer.bat to generate it.'
+        }), 404
+
 @app.route('/api/analyze', methods=['POST'])
 def analyze():
     ref_file = request.files.get('ref_image')
