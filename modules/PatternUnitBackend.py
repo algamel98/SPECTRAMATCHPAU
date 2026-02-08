@@ -1053,10 +1053,7 @@ def generate_pdf_headless(ref_img, sample_img, scores, diff_images, composite_sc
         ]))
         content.append(Spacer(1, 0.3*inch))
         
-    # NEW: Structural Difference Analysis Page
-    # Placed before Recommendations/Conclusion
-    # NEW: Structural Difference Analysis Page
-    # Placed before Recommendations/Conclusion
+    # Structural Difference Analysis
     if sections.get('structural', True) and structural_results:
         content.append(Spacer(1, 0.3 * inch))
         
@@ -1070,7 +1067,6 @@ def generate_pdf_headless(ref_img, sample_img, scores, diff_images, composite_sc
             Spacer(1, 0.15 * inch),
         ]))
         
-        # content.append(Paragraph("Pure Differences", StyleH1)) # Removed Title
         # Center the large image
         diff_tbl = Table([[structural_results['diff_img']]], colWidths=[6.2*inch])
         diff_tbl.setStyle(TableStyle([('ALIGN', (0,0), (-1,-1), 'CENTER')]))

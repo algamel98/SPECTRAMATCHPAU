@@ -46,10 +46,8 @@ installer\build_installer.bat
 
 This script automatically:
 1. Checks all prerequisites
-2. Converts the PNG logo to `.ico` format
-3. Generates branded wizard images (`.bmp`)
-4. Bundles the entire app with PyInstaller (~3-10 minutes first time)
-5. Compiles the Inno Setup installer
+2. Bundles the entire app with PyInstaller (~3-10 minutes first time)
+3. Compiles the Inno Setup installer
 
 ### Output
 ```
@@ -88,16 +86,14 @@ The Flask route will automatically redirect to this URL instead of serving the l
 | `spectramatch.spec` | PyInstaller spec file (what to bundle) |
 | `spectramatch_setup.iss` | Inno Setup script (installer wizard config) |
 | `LICENSE.txt` | License agreement shown during installation |
-| `convert_icon.py` | Converts PNG logo → multi-size `.ico` |
-| `create_wizard_images.py` | Generates branded `.bmp` wizard images |
+| `spectramatch.ico` | Application icon (multi-size, pre-built) |
+| `wizard_image.bmp` | Large wizard sidebar image (164×314, pre-built) |
+| `wizard_small.bmp` | Small wizard corner image (55×55, pre-built) |
 | `README.md` | This file |
 
 ### Generated During Build (gitignored)
 | File | Purpose |
 |------|---------|
-| `spectramatch.ico` | Application icon (multi-size) |
-| `wizard_image.bmp` | Large wizard sidebar image (164×314) |
-| `wizard_small.bmp` | Small wizard corner image (55×55) |
 | `output/SpectraMatch_Setup_*.exe` | The final installer |
 
 ---

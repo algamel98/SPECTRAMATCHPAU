@@ -125,11 +125,6 @@ def numpy_to_rl(img_array, max_w=5*inch, max_h=4*inch, assume_bgr=True):
     # Handle BGRA/RGBA - Composite over BLACK background
     if img_array.ndim == 3 and img_array.shape[2] == 4:
         b, g, r, a = cv2.split(img_array)
-        # Create black background
-        bg = np.zeros_like(b)
-        
-        # Composite: Source * Alpha + Dest * (1 - Alpha)
-        # Since Dest is black (0), it simplifies to Source * Alpha
         alpha_f = a.astype(float) / 255.0
         b = (b * alpha_f).astype(np.uint8)
         g = (g * alpha_f).astype(np.uint8)

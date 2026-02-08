@@ -32,8 +32,6 @@ Desktop.ini
 
 # Installer build artifacts
 installer/output/
-installer/*.ico
-installer/*.bmp
 dist/
 build/
 

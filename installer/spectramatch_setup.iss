@@ -9,9 +9,8 @@
 ;   - Uninstaller
 ;
 ; Prerequisites:
-;   1. Run  python installer/convert_icon.py   (creates .ico)
-;   2. Run  pyinstaller installer/spectramatch.spec  (creates dist/SpectraMatch/)
-;   3. Open this .iss in Inno Setup Compiler and click Build
+;   1. Run  pyinstaller installer/spectramatch.spec  (creates dist/SpectraMatch/)
+;   2. Open this .iss in Inno Setup Compiler and click Build
 ;      OR run:  iscc installer/spectramatch_setup.iss
 ; ============================================================
 

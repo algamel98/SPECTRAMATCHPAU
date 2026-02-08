@@ -15,7 +15,7 @@ PROJECT_DIR = os.path.abspath(os.path.join(SPECPATH, '..'))
 INSTALLER_DIR = os.path.join(PROJECT_DIR, 'installer')
 ICON_FILE = os.path.join(INSTALLER_DIR, 'spectramatch.ico')
 
-# Fallback if .ico hasn't been generated yet
+# Fallback if .ico is missing
 if not os.path.exists(ICON_FILE):
     ICON_FILE = None
 

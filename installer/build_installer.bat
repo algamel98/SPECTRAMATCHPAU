@@ -10,7 +10,7 @@ echo  ================================================================
 echo.
 
 :: ── Step 1: Check prerequisites ─────────────────────────────────
-echo  [1/5] Checking prerequisites...
+echo  [1/3] Checking prerequisites...
 echo.
 
 python --version >nul 2>&1
@@ -54,28 +54,8 @@ if errorlevel 1 (
 echo  [OK] All prerequisites found.
 echo.
 
-:: ── Step 2: Generate .ico icon ──────────────────────────────────
-echo  [2/5] Generating application icon...
-python installer\convert_icon.py
-if errorlevel 1 (
-    echo  [ERROR] Icon generation failed.
-    pause
-    exit /b 1
-)
-echo.
-
-:: ── Step 3: Generate wizard BMP images ──────────────────────────
-echo  [3/5] Generating installer wizard images...
-python installer\create_wizard_images.py
-if errorlevel 1 (
-    echo  [ERROR] Wizard image generation failed.
-    pause
-    exit /b 1
-)
-echo.
-
-:: ── Step 4: Bundle with PyInstaller ─────────────────────────────
-echo  [4/5] Bundling application with PyInstaller...
+:: ── Step 2: Bundle with PyInstaller ─────────────────────────────
+echo  [2/3] Bundling application with PyInstaller...
 echo         (This may take 3-10 minutes on first run)
 echo.
 pyinstaller --clean --noconfirm installer\spectramatch.spec
@@ -92,8 +72,8 @@ echo.
 echo  [OK] PyInstaller bundle complete: dist\SpectraMatch\
 echo.
 
-:: ── Step 5: Build Inno Setup installer ──────────────────────────
-echo  [5/5] Building Windows installer...
+:: ── Step 3: Build Inno Setup installer ──────────────────────────
+echo  [3/3] Building Windows installer...
 "%ISCC%" installer\spectramatch_setup.iss
 if errorlevel 1 (
     echo.
