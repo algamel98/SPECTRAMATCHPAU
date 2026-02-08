@@ -237,6 +237,9 @@ input, select, textarea, button { font-family: inherit; font-size: inherit; }
     align-items: center;
     padding: 0 6px;
     gap: 2px;
+    overflow: visible;
+    position: relative;
+    z-index: 100;
 }
 
 .tb-group {
@@ -2275,6 +2278,58 @@ select option {
 
 .tb-icon-btn {
     padding: 4px 6px !important;
+}
+
+/* ═══ Custom CSS Tooltips for toolbar buttons ═══ */
+.tb-btn[data-tooltip],
+.tb-toggle[data-tooltip],
+.lang-switch[data-tooltip],
+.theme-toggle[data-tooltip],
+.panel-hide-btn[data-tooltip],
+.btab-action[data-tooltip] {
+    position: relative;
+}
+
+.tb-btn[data-tooltip]::after,
+.tb-toggle[data-tooltip]::after,
+.lang-switch[data-tooltip]::after,
+.theme-toggle[data-tooltip]::after,
+.panel-hide-btn[data-tooltip]::after,
+.btab-action[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-float, #1e1e1e);
+    color: var(--text, #ccc);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.3;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border, #3c3c3c);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+    z-index: 9999;
+}
+
+.tb-btn[data-tooltip]:hover::after,
+.tb-toggle[data-tooltip]:hover::after,
+.lang-switch[data-tooltip]:hover::after,
+.theme-toggle[data-tooltip]:hover::after,
+.panel-hide-btn[data-tooltip]:hover::after,
+.btab-action[data-tooltip]:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+.tb-btn[data-tooltip]:disabled::after {
+    display: none;
 }
 
 .tb-reset-btn {

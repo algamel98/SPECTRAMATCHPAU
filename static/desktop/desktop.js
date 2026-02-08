@@ -268,10 +268,13 @@ function translatePage(){
         if(el.tagName==='OPTION') el.textContent=v;
         else el.textContent=v;
     });
-    /* Translate title (tooltip) attributes */
+    /* Translate title (tooltip) attributes — use data-tooltip for CSS tooltips, remove native title */
     document.querySelectorAll('[data-i18n-title]').forEach(function(el){
         var k=el.getAttribute('data-i18n-title'),v=t(k);
-        if(v&&v!==k) el.setAttribute('title',v);
+        if(v&&v!==k){
+            el.setAttribute('data-tooltip',v);
+            el.removeAttribute('title');
+        }
     });
     /* About dialog dynamic elements */
     if($('aboutDesc'))$('aboutDesc').textContent=t('about.desc');
