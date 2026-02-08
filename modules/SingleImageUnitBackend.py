@@ -399,7 +399,8 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
 
     if sections.get('illuminant_analysis', True) and measurements:
         story.append(Spacer(1, 10))
-        story.append(Paragraph(tr('illuminant_analysis'), StyleH1))
+        ill_heading = Paragraph(tr('illuminant_analysis'), StyleH1)
+        ill_heading_used = False
 
         ill_list = settings.get('test_illuminants', [])
         if not isinstance(ill_list, list):
@@ -453,12 +454,20 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
                     extra_styles.append(('FONTNAME', (0, mean_row_idx), (-1, mean_row_idx), PDF_FONT_BOLD))
                 t_ill.setStyle(TableStyle(extra_styles))
 
-                story.append(KeepTogether([
+                kt_items = []
+                if not ill_heading_used:
+                    kt_items.append(ill_heading)
+                    ill_heading_used = True
+                kt_items.extend([
                     Spacer(1, 8),
                     Paragraph(ill_subtitle, StyleH2),
                     t_ill,
                     Spacer(1, 12),
-                ]))
+                ])
+                story.append(KeepTogether(kt_items))
+
+        if not ill_heading_used:
+            story.append(ill_heading)
         
     story.append(Spacer(1, 30))
     
@@ -473,7 +482,8 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
 
         if any_meas_tables:
             meas_title = 'Ölçüm Verileri' if report_lang == 'tr' else 'Measurement Data'
-            story.append(Paragraph(meas_title, StyleH1))
+            meas_heading = Paragraph(meas_title, StyleH1)
+            meas_heading_used = False
         
         # 1. RGB Table
         if sections.get('rgb', True):
@@ -487,11 +497,16 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
                  rgb_data.append([str(m['id']), pos_str, f"{int(r)}", f"{int(g)}", f"{int(b)}"])
             
             t_rgb = RU.make_table(rgb_data, colWidths=[30, 80, 50, 50, 50])
-            story.append(KeepTogether([
+            kt_items = []
+            if any_meas_tables and not meas_heading_used:
+                kt_items.append(meas_heading)
+                meas_heading_used = True
+            kt_items.extend([
                 Paragraph(rgb_title, StyleH2),
                 t_rgb,
                 Spacer(1, 15),
-            ]))
+            ])
+            story.append(KeepTogether(kt_items))
 
         # 2. Lab* Color Space Analysis (enhanced)
         if sections.get('lab', True):
@@ -506,11 +521,16 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
                  lab_vals.append((l, a, b_))
                  
             t_lab = RU.make_table(lab_data, colWidths=[30, 60, 60, 60])
-            story.append(KeepTogether([
+            kt_items = []
+            if any_meas_tables and not meas_heading_used:
+                kt_items.append(meas_heading)
+                meas_heading_used = True
+            kt_items.extend([
                 Paragraph(lab_title, StyleH2),
                 t_lab,
                 Spacer(1, 10),
-            ]))
+            ])
+            story.append(KeepTogether(kt_items))
             
             # Lab* statistics summary
             if lab_vals:
@@ -569,11 +589,16 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
                  xyz_data.append([str(m['id']), f"{x:.2f}", f"{y:.2f}", f"{z:.2f}"])
                  
             t_xyz = RU.make_table(xyz_data, colWidths=[30, 60, 60, 60])
-            story.append(KeepTogether([
+            kt_items = []
+            if any_meas_tables and not meas_heading_used:
+                kt_items.append(meas_heading)
+                meas_heading_used = True
+            kt_items.extend([
                 Paragraph(xyz_title, StyleH2),
                 t_xyz,
                 Spacer(1, 15),
-            ]))
+            ])
+            story.append(KeepTogether(kt_items))
 
         # 4. CMYK Table
         if sections.get('cmyk', True):
@@ -585,10 +610,15 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
                  cmyk_data.append([str(m['id']), f"{c:.2f}", f"{mm:.2f}", f"{y:.2f}", f"{k:.2f}"])
                  
             t_cmyk = RU.make_table(cmyk_data, colWidths=[30, 50, 50, 50, 50])
-            story.append(KeepTogether([
+            kt_items = []
+            if any_meas_tables and not meas_heading_used:
+                kt_items.append(meas_heading)
+                meas_heading_used = True
+            kt_items.extend([
                 Paragraph(cmyk_title, StyleH2),
                 t_cmyk,
-            ]))
+            ])
+            story.append(KeepTogether(kt_items))
 
     # RGB Histograms (Single Image)
     if sections.get('histograms', True):
