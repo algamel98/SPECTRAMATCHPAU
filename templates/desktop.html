@@ -34,6 +34,9 @@
                 <div class="menu-dropdown">
                     <div class="menu-action" data-action="run"><span class="menu-shortcut-label" data-i18n="menu.run">Run Analysis</span><span class="menu-shortcut">F5</span></div>
                     <div class="menu-divider"></div>
+                    <div class="menu-action" data-action="export-results" data-i18n="menu.export.results">Export Results</div>
+                    <div class="menu-action" data-action="generate-report" data-i18n="menu.generate.report">Generate Report</div>
+                    <div class="menu-divider"></div>
                     <div class="menu-action" data-action="reset-settings" data-i18n="menu.reset">Reset All Settings</div>
                 </div>
             </div>
@@ -58,6 +61,10 @@
                 <span class="menu-label" data-i18n="menu.help">Help</span>
                 <div class="menu-dropdown">
                     <div class="menu-action" data-action="shortcuts" data-i18n="menu.shortcuts">Keyboard Shortcuts</div>
+                    <div class="menu-action" data-action="documentation" data-i18n="menu.documentation">Documentation</div>
+                    <div class="menu-divider"></div>
+                    <div class="menu-action" data-action="release-notes" data-i18n="menu.release.notes">Release Notes</div>
+                    <div class="menu-action" data-action="check-updates" data-i18n="menu.check.updates">Check for Updates</div>
                     <div class="menu-divider"></div>
                     <div class="menu-action" data-action="about" data-i18n="menu.about">About SpectraMatch</div>
                 </div>
@@ -65,11 +72,11 @@
         </div>
         <div class="menubar-right">
             <!-- Language Switcher -->
-            <div class="lang-switch" id="langSwitch" title="Switch language">
+            <div class="lang-switch" id="langSwitch" data-i18n-title="tb.title.lang.switch" title="Switch language">
                 <span class="lang-code" id="langCode">EN</span>
             </div>
             <!-- Theme Toggle -->
-            <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+            <button class="theme-toggle" id="themeToggle" data-i18n-title="tb.title.theme" title="Toggle theme">
                 <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                 <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             </button>
@@ -79,25 +86,25 @@
     <!-- ══════ Toolbar ══════ -->
     <div class="toolbar">
         <div class="tb-group">
-            <button class="tb-btn" id="tbOpenRef" title="Open Reference Image (Ctrl+O)">
+            <button class="tb-btn" id="tbOpenRef" data-i18n-title="tb.title.open.ref" title="Open Reference Image (Ctrl+O)">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
                 <span data-i18n="tb.reference">Reference</span>
             </button>
-            <button class="tb-btn" id="tbOpenSample" title="Open Sample Image (Ctrl+Shift+O)">
+            <button class="tb-btn" id="tbOpenSample" data-i18n-title="tb.title.open.sample" title="Open Sample Image (Ctrl+Shift+O)">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
                 <span data-i18n="tb.sample">Sample</span>
             </button>
         </div>
         <div class="tb-sep"></div>
         <div class="tb-group">
-            <button class="tb-btn tb-primary" id="tbRun" title="Run Analysis (F5)" disabled>
+            <button class="tb-btn tb-primary" id="tbRun" data-i18n-title="tb.title.run" title="Run Analysis (F5)" disabled>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                 <span data-i18n="tb.run">Run</span>
             </button>
         </div>
         <div class="tb-sep"></div>
         <div class="tb-group">
-            <button class="tb-btn" id="tbDelete" title="Delete Images (Ctrl+D)" disabled>
+            <button class="tb-btn" id="tbDelete" data-i18n-title="tb.title.delete" title="Delete Images (Ctrl+D)" disabled>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                 <span data-i18n="tb.delete">Delete</span>
             </button>
@@ -105,7 +112,7 @@
         <div class="tb-sep"></div>
         <!-- Region controls in toolbar -->
         <div class="tb-group">
-            <label class="tb-toggle" title="Process entire image">
+            <label class="tb-toggle" data-i18n-title="tb.title.full.image" title="Process entire image">
                 <input type="checkbox" id="tbFullImage" checked>
                 <span class="tb-toggle-track"></span>
                 <span class="tb-toggle-label" data-i18n="tb.full.image">Full Image</span>
@@ -135,7 +142,7 @@
         </div>
         <div class="tb-sep"></div>
         <div class="tb-group">
-            <label class="tb-toggle" title="Single image analysis mode">
+            <label class="tb-toggle" data-i18n-title="tb.title.single.mode" title="Single image analysis mode">
                 <input type="checkbox" id="tbSingleMode">
                 <span class="tb-toggle-track"></span>
                 <span class="tb-toggle-label" data-i18n="tb.single">Single Image</span>
@@ -144,7 +151,7 @@
         <div class="tb-spacer"></div>
         <div class="tb-group">
             <div class="tb-ready-test-wrap">
-                <button class="tb-btn tb-icon-btn tb-ready-test-btn" id="tbReadyTest" title="Ready-to-Test Images">
+                <button class="tb-btn tb-icon-btn tb-ready-test-btn" id="tbReadyTest" data-i18n-title="tb.title.ready.test" title="Ready-to-Test Images">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
                 </button>
                 <div class="tb-ready-dropdown" id="tbReadyDropdown">
@@ -181,13 +188,13 @@
                     <div class="tb-ready-item" data-single="6.png"><img class="tb-ready-thumb" src="/static/READYTOTEST/6.png" alt="Test6"><span>Test6.png</span></div>
                 </div>
             </div>
-            <button class="tb-btn tb-icon-btn" id="tbDatasheet" title="Technical Datasheet">
+            <button class="tb-btn tb-icon-btn" id="tbDatasheet" data-i18n-title="tb.title.datasheet" title="Technical Datasheet">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             </button>
-            <button class="tb-btn tb-icon-btn" id="tbFeedback" title="Send Feedback">
+            <button class="tb-btn tb-icon-btn" id="tbFeedback" data-i18n-title="tb.title.feedback" title="Send Feedback">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
             </button>
-            <button class="tb-btn tb-reset-btn" id="tbReset" title="Reset to Default" onclick="Desktop.resetToDefault()">
+            <button class="tb-btn tb-reset-btn" id="tbReset" data-i18n-title="tb.title.reset" title="Reset to Default" onclick="Desktop.resetToDefault()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
                 <span data-i18n="tb.reset">Reset</span>
             </button>
@@ -201,7 +208,7 @@
             <div class="panel-header">
                 <span class="panel-title" data-i18n="panel.workspace">Workspace</span>
                 <span class="panel-header-spacer"></span>
-                <button class="panel-hide-btn" data-hide-panel="panelWorkspace" title="Hide panel">
+                <button class="panel-hide-btn" data-hide-panel="panelWorkspace" data-i18n-title="tb.title.hide.panel" title="Hide panel">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
@@ -280,7 +287,7 @@
             <div class="panel-header">
                 <span class="panel-title" data-i18n="panel.properties">Properties</span>
                 <span class="panel-header-spacer"></span>
-                <button class="panel-hide-btn" data-hide-panel="panelProperties" title="Hide panel">
+                <button class="panel-hide-btn" data-hide-panel="panelProperties" data-i18n-title="tb.title.hide.panel" title="Hide panel">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
@@ -486,8 +493,8 @@
             <button class="btab active" data-btab="console" data-i18n="btab.console">Console</button>
             <button class="btab" data-btab="results" data-i18n="btab.results">Results</button>
             <div class="btab-spacer"></div>
-            <button class="btab-action" id="btnClearConsole" title="Clear console" data-i18n="btab.clear">Clear</button>
-            <button class="panel-hide-btn" data-hide-panel="bottomPanel" title="Hide panel">
+            <button class="btab-action" id="btnClearConsole" data-i18n-title="tb.title.clear.console" title="Clear console" data-i18n="btab.clear">Clear</button>
+            <button class="panel-hide-btn" data-hide-panel="bottomPanel" data-i18n-title="tb.title.hide.panel" title="Hide panel">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
@@ -775,6 +782,48 @@
                         <span class="shortcut-desc" id="scCloseDialogs">Close all dialogs</span>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════ Release Notes Dialog ══════ -->
+    <div class="dialog-overlay" id="releaseNotesDialog" style="display:none">
+        <div class="dialog dialog-wide">
+            <div class="dialog-header">
+                <span data-i18n="menu.release.notes">Release Notes</span>
+                <button class="dialog-close" onclick="document.getElementById('releaseNotesDialog').style.display='none'">&times;</button>
+            </div>
+            <div class="dialog-body">
+                <div style="margin-bottom:12px">
+                    <strong>v2.2.1</strong> <span style="opacity:0.6">(2026)</span>
+                </div>
+                <ul style="margin:0 0 12px 18px;line-height:1.8;font-size:13px;">
+                    <li data-i18n="rn.item1">Full Turkish language support for all UI elements</li>
+                    <li data-i18n="rn.item2">Complete toolbar with all analysis and help options</li>
+                    <li data-i18n="rn.item3">Freehand (Pen) region selection tool</li>
+                    <li data-i18n="rn.item4">Ready-to-Test built-in sample images</li>
+                    <li data-i18n="rn.item5">Session persistence and state restoration</li>
+                    <li data-i18n="rn.item6">Native Save-As dialog for PDF reports</li>
+                    <li data-i18n="rn.item7">Manual and random sampling point selection</li>
+                    <li data-i18n="rn.item8">GLCM texture and Fourier frequency analysis</li>
+                    <li data-i18n="rn.item9">Comprehensive PDF reports with visualizations</li>
+                    <li data-i18n="rn.item10">Panel resize and layout customization</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════ Check for Updates Dialog ══════ -->
+    <div class="dialog-overlay" id="checkUpdatesDialog" style="display:none">
+        <div class="dialog dialog-sm">
+            <div class="dialog-header">
+                <span data-i18n="menu.check.updates">Check for Updates</span>
+                <button class="dialog-close" onclick="document.getElementById('checkUpdatesDialog').style.display='none'">&times;</button>
+            </div>
+            <div class="dialog-body" style="text-align:center;padding:24px;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.5;margin-bottom:12px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <div style="font-size:15px;font-weight:600;margin-bottom:6px" data-i18n="updates.current">You are up to date!</div>
+                <div style="font-size:13px;opacity:0.7">SpectraMatch Desktop v2.2.1</div>
             </div>
         </div>
     </div>

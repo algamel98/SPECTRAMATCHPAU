@@ -61,6 +61,20 @@ var T={en:{
 'rpt.summary':'Summary','rpt.conclusion':'Conclusion','rpt.pattern.rec':'Recommendations',
 'btab.console':'Console','btab.results':'Results','btab.clear':'Clear',
 'results.empty':'Run an analysis to see results here.','sb.ready':'Ready',
+'sb.mode':'Mode','sb.region':'Region','sb.images':'Images','sb.processing':'Processing...','sb.custom':'Custom',
+'log.init':'SpectraMatch Desktop v2.2.1 initialized','log.session.restored':'Session restored',
+'log.theme':'Theme','log.language':'Language','log.region':'Region','log.shape':'Shape',
+'log.loaded':'Loaded','log.region.center.set':'Region center set','log.console.cleared':'Console cleared',
+'log.panel.toggled':'Panel toggled','log.settings.reset':'All settings reset to defaults',
+'log.starting.analysis':'Starting analysis...','log.analysis.complete':'Analysis complete!',
+'log.decision':'Decision','log.points.confirmed':'Points confirmed','log.points.reset':'Points reset due to region change',
+'log.generated.random':'Generated random points','log.region.moved':'Region moved to',
+'log.saving':'Saving','log.saved':'Saved','log.save.cancelled':'Save cancelled','log.save.error':'Save error',
+'log.download.error':'Download error',
+'loading.title':'Processing Analysis','loading.text':'Please wait...','loading.running':'Running analysis engine...',
+'feedback.fail':'Failed to send. Please try again.','feedback.network':'Network error. Check your connection.',
+'region.changed':'Region Changed','region.points.outside.msg':' point(s) are now outside the new region. Reset all points?',
+'sampling.all.selected':'All points already selected.',
 'about.title':'About SpectraMatch','ds.title':'Technical Documentation',
 'ds.desc':'The complete technical documentation is available in PDF format.',
 'ds.available':'Available in English and Turkish',
@@ -79,13 +93,19 @@ var T={en:{
 'about.feat2':'SSIM, Gradient & Phase Pattern Matching',
 'about.feat3':'Comprehensive PDF Reports',
 'about.feat4':'CIE Standard Illuminants (D65, D50, TL84)',
-'menu.shortcuts':'Keyboard Shortcuts','sc.close.dialogs':'Close all dialogs',
+'menu.shortcuts':'Keyboard Shortcuts','menu.documentation':'Documentation','menu.release.notes':'Release Notes','menu.check.updates':'Check for Updates',
+'menu.export.results':'Export Results','menu.generate.report':'Generate Report',
+'sc.close.dialogs':'Close all dialogs',
 'confirm.delete.title':'Delete All Images','confirm.delete.msg':'Are you sure you want to delete all uploaded images? This action cannot be undone.',
 'tb.reset':'Reset','reset.title':'Reset to Default','reset.msg':'This will reset ALL settings, clear all images, and return the application to its initial first-run state. Are you sure?','reset.done':'Application reset to default state',
 'error.no.sample':'Please upload a sample image first.','error.no.both':'Please upload both reference and sample images first.',
+'error.no.results':'No results to export. Please run an analysis first.',
 'feedback.sent':'Feedback sent successfully!','feedback.empty':'Please enter a message.',
 'mode.single':'Single Image','mode.dual':'Dual Image','color.score':'Color Score','pattern.score':'Pattern Score','overall.score':'Overall Score',
 'region.click.hint':'Click on image to place region center','region.outside':'Point is outside the selected region',
+'updates.current':'You are up to date!',
+'rn.item1':'Full Turkish language support for all UI elements','rn.item2':'Complete toolbar with all analysis and help options','rn.item3':'Freehand (Pen) region selection tool','rn.item4':'Ready-to-Test built-in sample images','rn.item5':'Session persistence and state restoration','rn.item6':'Native Save-As dialog for PDF reports','rn.item7':'Manual and random sampling point selection','rn.item8':'GLCM texture and Fourier frequency analysis','rn.item9':'Comprehensive PDF reports with visualizations','rn.item10':'Panel resize and layout customization',
+'tb.title.open.ref':'Open Reference Image (Ctrl+O)','tb.title.open.sample':'Open Sample Image (Ctrl+Shift+O)','tb.title.run':'Run Analysis (F5)','tb.title.delete':'Delete Images (Ctrl+D)','tb.title.full.image':'Process entire image','tb.title.single.mode':'Single image analysis mode','tb.title.ready.test':'Ready-to-Test Images','tb.title.datasheet':'Technical Datasheet','tb.title.feedback':'Send Feedback','tb.title.reset':'Reset to Default','tb.title.lang.switch':'Switch language','tb.title.theme':'Toggle theme','tb.title.hide.panel':'Hide panel','tb.title.clear.console':'Clear console',
 'rpt.report.summary':'Report Summary','rpt.color.analysis':'Color Analysis Details','rpt.pattern.analysis':'Pattern Analysis Details',
 'rpt.texture.frequency':'Texture & Frequency Analysis','rpt.single.image.analysis':'Single Image Analysis',
 'rpt.color.scoring.label':'Color Scoring','rpt.pattern.scoring.label':'Pattern Scoring',
@@ -161,6 +181,20 @@ var T={en:{
 'rpt.summary':'Özet','rpt.conclusion':'Sonuç','rpt.pattern.rec':'Öneriler',
 'btab.console':'Konsol','btab.results':'Sonuçlar','btab.clear':'Temizle',
 'results.empty':'Sonuçları görmek için bir analiz çalıştırın.','sb.ready':'Hazır',
+'sb.mode':'Mod','sb.region':'Bölge','sb.images':'Görüntüler','sb.processing':'İşleniyor...','sb.custom':'Özel',
+'log.init':'SpectraMatch Desktop v2.2.1 başlatıldı','log.session.restored':'Oturum geri yüklendi',
+'log.theme':'Tema','log.language':'Dil','log.region':'Bölge','log.shape':'Şekil',
+'log.loaded':'Yüklendi','log.region.center.set':'Bölge merkezi ayarlandı','log.console.cleared':'Konsol temizlendi',
+'log.panel.toggled':'Panel değiştirildi','log.settings.reset':'Tüm ayarlar varsayılanlara sıfırlandı',
+'log.starting.analysis':'Analiz başlatılıyor...','log.analysis.complete':'Analiz tamamlandı!',
+'log.decision':'Karar','log.points.confirmed':'Noktalar onaylandı','log.points.reset':'Bölge değişikliği nedeniyle noktalar sıfırlandı',
+'log.generated.random':'Rastgele noktalar oluşturuldu','log.region.moved':'Bölge taşındı',
+'log.saving':'Kaydediliyor','log.saved':'Kaydedildi','log.save.cancelled':'Kaydetme iptal edildi','log.save.error':'Kaydetme hatası',
+'log.download.error':'İndirme hatası',
+'loading.title':'Analiz İşleniyor','loading.text':'Lütfen bekleyin...','loading.running':'Analiz motoru çalıştırılıyor...',
+'feedback.fail':'Gönderilemedi. Lütfen tekrar deneyin.','feedback.network':'Ağ hatası. Bağlantınızı kontrol edin.',
+'region.changed':'Bölge Değişti','region.points.outside.msg':' nokta(lar) yeni bölgenin dışında. Tüm noktalar sıfırlansın mı?',
+'sampling.all.selected':'Tüm noktalar zaten seçildi.',
 'about.title':'SpectraMatch Hakkında','ds.title':'Teknik Dokümantasyon',
 'ds.desc':'Teknik dokümantasyon PDF formatında mevcuttur.',
 'ds.available':'İngilizce ve Türkçe olarak mevcuttur',
@@ -179,13 +213,19 @@ var T={en:{
 'about.feat2':'SSIM, Gradyan ve Faz Desen Eşleştirme',
 'about.feat3':'Kapsamlı PDF Raporları',
 'about.feat4':'CIE Standart Aydınlatmalar (D65, D50, TL84)',
-'menu.shortcuts':'Klavye Kısayolları','sc.close.dialogs':'Tüm diyalogları kapat',
+'menu.shortcuts':'Klavye Kısayolları','menu.documentation':'Dokümantasyon','menu.release.notes':'Sürüm Notları','menu.check.updates':'Güncellemeleri Kontrol Et',
+'menu.export.results':'Sonuçları Dışa Aktar','menu.generate.report':'Rapor Oluştur',
+'sc.close.dialogs':'Tüm diyalogları kapat',
 'confirm.delete.title':'Tüm Görüntüleri Sil','confirm.delete.msg':'Tüm görüntüleri silmek istediğinizden emin misiniz?',
 'tb.reset':'Sıfırla','reset.title':'Varsayılana Sıfırla','reset.msg':'Bu işlem TÜM ayarları sıfırlayacak, tüm görüntüleri temizleyecek ve uygulamayı ilk açılış durumuna döndürecektir. Emin misiniz?','reset.done':'Uygulama varsayılan duruma sıfırlandı',
 'error.no.sample':'Lütfen önce bir örnek görüntü yükleyin.','error.no.both':'Lütfen önce her iki görüntüyü de yükleyin.',
+'error.no.results':'Dışa aktarılacak sonuç yok. Lütfen önce bir analiz çalıştırın.',
 'feedback.sent':'Geri bildirim gönderildi!','feedback.empty':'Lütfen bir mesaj girin.',
 'mode.single':'Tek Görüntü','mode.dual':'Çift Görüntü','color.score':'Renk Skoru','pattern.score':'Desen Skoru','overall.score':'Genel Skor',
 'region.click.hint':'Bölge merkezini yerleştirmek için görüntüye tıklayın','region.outside':'Nokta seçili bölgenin dışında',
+'updates.current':'Güncelsiniz!',
+'rn.item1':'Tüm arayüz öğeleri için tam Türkçe dil desteği','rn.item2':'Tüm analiz ve yardım seçenekleriyle eksiksiz araç çubuğu','rn.item3':'Serbest çizim (Kalem) bölge seçim aracı','rn.item4':'Teste hazır yerleşik örnek görüntüler','rn.item5':'Oturum kalıcılığı ve durum geri yükleme','rn.item6':'PDF raporları için yerel Farklı Kaydet diyaloğu','rn.item7':'Manuel ve rastgele örnekleme noktası seçimi','rn.item8':'GLCM doku ve Fourier frekans analizi','rn.item9':'Görselleştirmelerle kapsamlı PDF raporları','rn.item10':'Panel yeniden boyutlandırma ve düzen özelleştirme',
+'tb.title.open.ref':'Referans Görüntü Aç (Ctrl+O)','tb.title.open.sample':'Örnek Görüntü Aç (Ctrl+Shift+O)','tb.title.run':'Analizi Çalıştır (F5)','tb.title.delete':'Görüntüleri Sil (Ctrl+D)','tb.title.full.image':'Tüm görüntüyü işle','tb.title.single.mode':'Tek görüntü analiz modu','tb.title.ready.test':'Teste Hazır Görüntüler','tb.title.datasheet':'Teknik Veri Sayfası','tb.title.feedback':'Geri Bildirim Gönder','tb.title.reset':'Varsayılana Sıfırla','tb.title.lang.switch':'Dil değiştir','tb.title.theme':'Tema değiştir','tb.title.hide.panel':'Paneli gizle','tb.title.clear.console':'Konsolu temizle',
 'rpt.report.summary':'Rapor Özeti','rpt.color.analysis':'Renk Analizi Detayları','rpt.pattern.analysis':'Desen Analizi Detayları',
 'rpt.texture.frequency':'Doku ve Frekans Analizi','rpt.single.image.analysis':'Tek Görüntü Analizi',
 'rpt.color.scoring.label':'Renk Puanlama','rpt.pattern.scoring.label':'Desen Puanlama',
@@ -228,6 +268,11 @@ function translatePage(){
         if(el.tagName==='OPTION') el.textContent=v;
         else el.textContent=v;
     });
+    /* Translate title (tooltip) attributes */
+    document.querySelectorAll('[data-i18n-title]').forEach(function(el){
+        var k=el.getAttribute('data-i18n-title'),v=t(k);
+        if(v&&v!==k) el.setAttribute('title',v);
+    });
     /* About dialog dynamic elements */
     if($('aboutDesc'))$('aboutDesc').textContent=t('about.desc');
     if($('aboutTagline'))$('aboutTagline').textContent=t('about.tagline');
@@ -255,7 +300,7 @@ document.addEventListener('DOMContentLoaded',function(){
     document.body.setAttribute('data-theme',State.theme);
     $('langCode').textContent=State.lang.toUpperCase();
     translatePage();
-    log('SpectraMatch Desktop v2.2.1 initialized','info');
+    log(t('log.init'),'info');
     log(t('sb.ready'),'');
     initMenuBar();initToolbar();initFileInputs();initReadyToTest();initPropertySections();
     initBottomTabs();initKeyboard();initTheme();initLang();
@@ -263,7 +308,7 @@ document.addEventListener('DOMContentLoaded',function(){
     initRegionOverlays();initRegionDrag();initPanelControls();initPanelResize();
     /* Restore persisted state (after all UI is initialized) */
     var restored=restoreState();
-    if(restored){log('Session restored','info');}
+    if(restored){log(t('log.session.restored'),'info');}
     updateUI();updateRegionOverlays();updateSamplingUI();
     /* Wire auto-save to property inputs */
     document.querySelectorAll('#panelProperties input, #panelProperties select').forEach(function(el){
@@ -277,7 +322,7 @@ function initTheme(){
         State.theme=State.theme==='dark'?'light':'dark';
         document.body.setAttribute('data-theme',State.theme);
         localStorage.setItem('desk_theme',State.theme);
-        log('Theme: '+State.theme,'info');
+        log(t('log.theme')+': '+State.theme,'info');
         scheduleSave();
     });
 }
@@ -289,7 +334,7 @@ function initLang(){
         $('langCode').textContent=State.lang.toUpperCase();
         localStorage.setItem('desk_lang',State.lang);
         translatePage();updateUI();
-        log('Language: '+(State.lang==='en'?'English':'Türkçe'),'info');
+        log(t('log.language')+': '+(State.lang==='en'?'English':'Türkçe'),'info');
         scheduleSave();
     });
 }
@@ -334,7 +379,23 @@ function handleMenu(cmd){
         case 'datasheet':$('datasheetDialog').style.display='';break;
         case 'feedback':$('feedbackDialog').style.display='';break;
         case 'contact':$('contactDialog').style.display='';break;
+        case 'export-results':exportResults();break;
+        case 'generate-report':runAnalysis();break;
+        case 'documentation':$('datasheetDialog').style.display='';break;
+        case 'release-notes':$('releaseNotesDialog').style.display='';break;
+        case 'check-updates':$('checkUpdatesDialog').style.display='';break;
         case 'exit':window.close();break;
+    }
+}
+
+function exportResults(){
+    if(!State.lastResult){showAlert(t('menu.export.results'),t('error.no.results'),'\u26a0\ufe0f');return;}
+    /* If there's a PDF, trigger download of the full report */
+    if(State.lastResult.pdf_url){
+        var fn=State.lastResult.fn_full||'Report.pdf';
+        saveAsDownload(State.lastResult.pdf_url+'?fn='+encodeURIComponent(fn),fn);
+    }else{
+        showAlert(t('menu.export.results'),t('error.no.results'),'\u26a0\ufe0f');
     }
 }
 
@@ -377,7 +438,7 @@ function initToolbar(){
     $('tbFullImage').addEventListener('change',function(){
         State.fullImage=this.checked;
         $('tbRegionControls').classList.toggle('hidden',State.fullImage);
-        log('Region: '+(State.fullImage?t('tb.full.image'):'Custom'),'info');
+        log(t('log.region')+': '+(State.fullImage?t('tb.full.image'):t('sb.custom')),'info');
         updateRegionOverlays();updateUI();scheduleSave();
     });
     $('tbShape').addEventListener('change',function(){
@@ -395,7 +456,7 @@ function initToolbar(){
         if(!isPen){resetRegionCenter();}
         updateRegionOverlays();
         checkPointsAfterRegionChange();
-        log('Shape: '+t(v),'info');
+        log(t('log.shape')+': '+t(v),'info');
         scheduleSave();
     });
     var sync=function(sId,nId){
@@ -464,7 +525,7 @@ function loadImage(which,file){
             resetRegionCenter();
             updateRegionOverlays();
             updateUI();
-            log('Loaded '+which+': '+file.name+' ('+w+'x'+h+')','success');
+            log(t('log.loaded')+' '+which+': '+file.name+' ('+w+'x'+h+')','success');
             scheduleSave();
         };img.src=e.target.result;
     };reader.readAsDataURL(file);
@@ -606,7 +667,7 @@ function onViewerMouseDown(e,which){
     State.regionCenterY=Math.round(Math.max(0,Math.min(imgEl.naturalHeight,py)));
     clampRegionCenter();
     updateRegionOverlays();
-    log('Region center set: ('+State.regionCenterX+', '+State.regionCenterY+')','info');
+    log(t('log.region.center.set')+': ('+State.regionCenterX+', '+State.regionCenterY+')','info');
     scheduleSave();
 }
 var _penWhich=null;
@@ -883,10 +944,10 @@ function sendFeedback(){
             showAlert(t('fb.title'),t('feedback.sent'),'✅');
             $('feedbackDialog').style.display='none';$('fbMessage').value='';
         }else{
-            showAlert(t('fb.title'),'Failed to send. Please try again.','⚠️');
+            showAlert(t('fb.title'),t('feedback.fail'),'⚠️');
         }
     })
-    .catch(function(){showAlert(t('fb.title'),'Network error. Check your connection.','⚠️');})
+    .catch(function(){showAlert(t('fb.title'),t('feedback.network'),'⚠️');})
     .finally(function(){if(btn){btn.disabled=false;btn.style.opacity='';}});
 }
 
@@ -907,7 +968,7 @@ function initBottomTabs(){
             $('tab'+tgt.charAt(0).toUpperCase()+tgt.slice(1)).classList.add('active');
         });
     });
-    $('btnClearConsole').addEventListener('click',function(){$('consoleOut').innerHTML='';log('Console cleared','info');});
+    $('btnClearConsole').addEventListener('click',function(){$('consoleOut').innerHTML='';log(t('log.console.cleared'),'info');});
 }
 
 /* ═══ Keyboard ═══ */
@@ -955,9 +1016,9 @@ function checkPointsAfterRegionChange(){
     State.manualPoints.forEach(function(p){if(!isPointInRegion(p.x,p.y))invalid++;});
     State.randomPoints.forEach(function(p){if(!isPointInRegion(p.x,p.y))invalid++;});
     if(invalid>0){
-        showConfirm('Region Changed',
-            invalid+' point(s) are now outside the new region. Reset all points?','⚠️',
-            function(){State.manualPoints=[];State.randomPoints=[];updateSamplingUI();log('Points reset due to region change','warn');}
+        showConfirm(t('region.changed'),
+            invalid+t('region.points.outside.msg'),'⚠️',
+            function(){State.manualPoints=[];State.randomPoints=[];updateSamplingUI();log(t('log.points.reset'),'warn');}
         );
     }
 }
@@ -1026,7 +1087,7 @@ function completeRandomly(){
         }
     }
     State.samplingMode=m>0?'hybrid':'random';
-    updateSamplingUI();log('Generated '+State.randomPoints.length+' random points','info');
+    updateSamplingUI();log(t('log.generated.random')+': '+State.randomPoints.length,'info');
     scheduleSave();
 }
 
@@ -1052,7 +1113,7 @@ function initPointSelector(){
         $('pointSelectorDialog').style.display='none';
         syncSamplingMode();
         updateSamplingUI();
-        log('Points confirmed: '+(State.manualPoints.length+State.randomPoints.length),'success');
+        log(t('log.points.confirmed')+': '+(State.manualPoints.length+State.randomPoints.length),'success');
     });
     $('psRefCanvas').addEventListener('click',psClick);
     $('psSampleCanvas').addEventListener('click',psClick);
@@ -1181,13 +1242,13 @@ function updateUI(){
     var canRun=State.singleMode?hasSample:(hasRef&&hasSample);
     $('tbRun').disabled=!canRun||State.isProcessing;
     $('tbDelete').disabled=(!hasRef&&!hasSample)||State.isProcessing;
-    $('sbMode').textContent='Mode: '+t(State.singleMode?'mode.single':'mode.dual');
-    $('sbRegion').textContent='Region: '+(State.fullImage?t('tb.full.image'):'Custom');
+    $('sbMode').textContent=t('sb.mode')+': '+t(State.singleMode?'mode.single':'mode.dual');
+    $('sbRegion').textContent=t('sb.region')+': '+(State.fullImage?t('tb.full.image'):t('sb.custom'));
     var ic=(hasRef?1:0)+(hasSample?1:0),it=State.singleMode?1:2;
-    $('sbImages').textContent='Images: '+ic+'/'+it;
+    $('sbImages').textContent=t('sb.images')+': '+ic+'/'+it;
     if(State.isProcessing){
-        $('wsStatusDot').className='ws-status-dot running';$('wsStatusText').textContent='Processing...';
-        $('sbIndicator').className='sb-indicator busy';$('sbStatus').textContent='Processing...';
+        $('wsStatusDot').className='ws-status-dot running';$('wsStatusText').textContent=t('sb.processing');
+        $('sbIndicator').className='sb-indicator busy';$('sbStatus').textContent=t('sb.processing');
     }else if(canRun){
         $('wsStatusDot').className='ws-status-dot ready';$('wsStatusText').textContent=t('sb.ready');
         $('sbIndicator').className='sb-indicator ready';$('sbStatus').textContent=t('sb.ready');
@@ -1296,8 +1357,8 @@ function runAnalysis(){
         if(!State.refFile||!State.sampleFile){showAlert('Error',t('error.no.both'),'⚠️');return;}
     }
     State.isProcessing=true;updateUI();
-    $('loadingTitle').textContent='Processing Analysis';$('loadingText').textContent='Please wait...';$('loadingOverlay').style.display='';
-    log('Starting analysis...','info');
+    $('loadingTitle').textContent=t('loading.title');$('loadingText').textContent=t('loading.text');$('loadingOverlay').style.display='';
+    log(t('log.starting.analysis'),'info');
 
     var settings=collectSettings(),regionData=buildRegionData();
     /* Log settings being sent to backend */
@@ -1311,17 +1372,17 @@ function runAnalysis(){
     else{fd.append('ref_image',State.refFile);fd.append('sample_image',State.sampleFile);fd.append('single_image_mode','false');}
     fd.append('settings',JSON.stringify(settings));fd.append('region_data',JSON.stringify(regionData));
 
-    $('loadingText').textContent='Running analysis engine...';
+    $('loadingText').textContent=t('loading.running');
 
     fetch('/api/analyze',{method:'POST',body:fd})
     .then(function(r){if(!r.ok)return r.json().then(function(d){throw new Error(d.error||'Server error');});return r.json();})
     .then(function(result){
         State.isProcessing=false;State.lastResult=result;$('loadingOverlay').style.display='none';updateUI();
         if(result.success){
-            log('Analysis complete!','success');
+            log(t('log.analysis.complete'),'success');
             if(!result.single_image_mode){
                 log(t('color.score')+': '+(result.color_score||0).toFixed(1)+' | '+t('pattern.score')+': '+(result.pattern_score||0).toFixed(1)+' | '+t('overall.score')+': '+(result.overall_score||0).toFixed(1),'info');
-                log('Decision: '+(result.decision||'—'),result.decision==='ACCEPT'?'success':(result.decision==='REJECT'?'error':'warn'));
+                log(t('log.decision')+': '+(result.decision||'—'),result.decision==='ACCEPT'?'success':(result.decision==='REJECT'?'error':'warn'));
             }
             displayResults(result);switchToResultsTab();
         }else{log('Error: '+(result.error||'Unknown'),'error');}
@@ -1742,7 +1803,7 @@ function resetSettings(){
     State.fullImage=true;$('tbFullImage').checked=true;
     $('tbRegionControls').classList.add('hidden');
     resetRegionCenter();updateRegionOverlays();updateSamplingUI();
-    log('All settings reset to defaults','warn');
+    log(t('log.settings.reset'),'warn');
     scheduleSave();
 }
 
@@ -1753,7 +1814,7 @@ function initPanelControls(){
             e.stopPropagation();
             var pid=this.getAttribute('data-hide-panel');
             togglePanel(pid);
-            log('Panel toggled: '+pid,'info');
+            log(t('log.panel.toggled')+': '+pid,'info');
         });
     });
 }
@@ -1817,12 +1878,12 @@ function initPanelResize(){
 function saveAsDownload(url,defaultName){
     /* Prefer native Save-As via pywebview bridge (desktop app) */
     if(window.pywebview&&window.pywebview.api&&window.pywebview.api.save_report){
-        log('Saving: '+defaultName+'...','info');
+        log(t('log.saving')+': '+defaultName+'...','info');
         window.pywebview.api.save_report(url,defaultName||'report.pdf').then(function(r){
-            if(r&&r.ok){log('Saved: '+r.path,'success');}
-            else if(r&&r.reason==='cancelled'){log('Save cancelled','info');}
-            else{log('Save error: '+(r&&r.reason||'unknown'),'error');showAlert('Download Error',r&&r.reason||'Unknown error','❌');}
-        }).catch(function(err){log('Save error: '+err,'error');showAlert('Download Error',String(err),'❌');});
+            if(r&&r.ok){log(t('log.saved')+': '+r.path,'success');}
+            else if(r&&r.reason==='cancelled'){log(t('log.save.cancelled'),'info');}
+            else{log(t('log.save.error')+': '+(r&&r.reason||'unknown'),'error');showAlert(t('log.download.error'),r&&r.reason||'Unknown error','❌');}
+        }).catch(function(err){log(t('log.save.error')+': '+err,'error');showAlert(t('log.download.error'),String(err),'❌');});
         return;
     }
     /* Browser fallback: fetch blob → object URL → programmatic click */
@@ -1836,10 +1897,10 @@ function saveAsDownload(url,defaultName){
         document.body.appendChild(a);
         a.click();
         setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(a.href);},200);
-        log('Saved: '+defaultName,'success');
+        log(t('log.saved')+': '+defaultName,'success');
     }).catch(function(err){
-        showAlert('Download Error',err.message,'❌');
-        log('Download error: '+err.message,'error');
+        showAlert(t('log.download.error'),err.message,'❌');
+        log(t('log.download.error')+': '+err.message,'error');
     });
 }
 
@@ -1896,7 +1957,7 @@ function initRegionDrag(){
                 myDrag=false;_regionDragging=false;
                 parent.style.cursor='';
                 document.body.style.userSelect='';
-                log('Region moved to ('+State.regionCenterX+', '+State.regionCenterY+')','info');
+                log(t('log.region.moved')+' ('+State.regionCenterX+', '+State.regionCenterY+')','info');
                 scheduleSave();
             }
         });

@@ -50,5 +50,14 @@ terms, do not install or use the software.
    This agreement shall be governed by and construed in accordance with
    applicable international copyright laws and treaties.
 
+This work was prepared by the student Abdelbary Algamel,
+a postgraduate student in the Department of Electrical and Electronics Engineering,
+Pamukkale University, Denizli – Turkey,
+under the supervision of Dr. Adem Ukte.
+
+
 By clicking "I Agree" during installation, you acknowledge that you have
 read, understood, and agree to be bound by the terms of this agreement.
+
+The project is still under testing and experimentation.
+
