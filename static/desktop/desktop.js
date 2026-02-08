@@ -138,7 +138,10 @@ var T={en:{
 'rpt.glcm.heatmap':'GLCM Texture Heatmap','rpt.glcm.heatmap.caption':'Gray-Level Co-occurrence Matrix texture feature comparison heatmaps.',
 'rpt.histogram.single':'RGB Histogram','rpt.histogram.single.caption':'RGB channel distribution of the sample image.',
 'rpt.spectral.single':'Spectral Distribution (Proxy)','rpt.spectral.single.caption':'Approximated spectral reflectance curve from mean RGB values.',
-'rpt.fourier.single':'Fourier Spectrum','rpt.fourier.single.caption':'2D FFT magnitude spectrum showing frequency-domain characteristics.'
+'rpt.fourier.single':'Fourier Spectrum','rpt.fourier.single.caption':'2D FFT magnitude spectrum showing frequency-domain characteristics.',
+'rpt.score.color':'Color','rpt.score.pattern':'Pattern','rpt.score.overall':'Overall',
+'rpt.dl.full':'Full Report','rpt.dl.color':'Color Report','rpt.dl.pattern':'Pattern Report','rpt.dl.receipt':'Settings Receipt',
+'rpt.decision.accept':'ACCEPT','rpt.decision.reject':'REJECT','rpt.decision.conditional':'CONDITIONAL','rpt.decision.complete':'COMPLETE'
 },tr:{
 'menu.file':'Dosya','menu.open.ref':'Referans Görüntü Aç...','menu.open.sample':'Örnek Görüntü Aç...',
 'menu.delete.all':'Tüm Görüntüleri Sil','menu.exit':'Çıkış','menu.analysis':'Analiz','menu.run':'Analizi Çalıştır',
@@ -258,7 +261,10 @@ var T={en:{
 'rpt.glcm.heatmap':'GLCM Doku Is\u0131 Haritas\u0131','rpt.glcm.heatmap.caption':'Gri Seviye E\u015f-olu\u015fum Matrisi doku \u00f6zelli\u011fi kar\u015f\u0131la\u015ft\u0131rma \u0131s\u0131 haritalar\u0131.',
 'rpt.histogram.single':'RGB Histogram\u0131','rpt.histogram.single.caption':'Numune g\u00f6r\u00fcnt\u00fcs\u00fcn\u00fcn RGB kanal da\u011f\u0131l\u0131m\u0131.',
 'rpt.spectral.single':'Spektral Da\u011f\u0131l\u0131m (Vekil)','rpt.spectral.single.caption':'Ortalama RGB de\u011ferlerinden yakla\u015f\u0131k spektral yans\u0131tma e\u011frisi.',
-'rpt.fourier.single':'Fourier Spektrumu','rpt.fourier.single.caption':'Frekans alan\u0131 \u00f6zelliklerini g\u00f6steren 2D FFT b\u00fcy\u00fckl\u00fck spektrumu.'
+'rpt.fourier.single':'Fourier Spektrumu','rpt.fourier.single.caption':'Frekans alan\u0131 \u00f6zelliklerini g\u00f6steren 2D FFT b\u00fcy\u00fckl\u00fck spektrumu.',
+'rpt.score.color':'Renk','rpt.score.pattern':'Desen','rpt.score.overall':'Genel',
+'rpt.dl.full':'Tam Rapor','rpt.dl.color':'Renk Raporu','rpt.dl.pattern':'Desen Raporu','rpt.dl.receipt':'Ayar Makbuzu',
+'rpt.decision.accept':'KABUL','rpt.decision.reject':'RED','rpt.decision.conditional':'KOŞULLU','rpt.decision.complete':'TAMAMLANDI'
 }};
 
 function t(k){return(T[State.lang]||T.en)[k]||(T.en)[k]||k;}
@@ -1446,28 +1452,45 @@ function displayResults(result){
     if(result.operator)html+='<span>'+result.operator+'</span>';
     html+='</div></div>';
 
+    /* ── Collect active section flags from checkboxes ── */
+    var sec={};
+    function schk(id,d){var e=$(id);return e?e.checked:d;}
+    sec.color_spaces=schk('rptColorSpaces',true);sec.rgb=schk('rptRgb',true);sec.lab=schk('rptLab',true);
+    sec.xyz=schk('rptXyz',true);sec.cmyk=schk('rptCmyk',true);sec.diff_metrics=schk('rptDiffMetrics',true);
+    sec.stats=schk('rptStats',true);sec.detailed_lab=schk('rptDetailedLab',true);
+    sec.visualizations=schk('rptVisualizations',true);sec.spectral=schk('rptSpectral',true);
+    sec.histograms=schk('rptHistograms',true);sec.visual_diff=schk('rptVisualDiff',true);
+    sec.illuminant_analysis=schk('rptIlluminant',true);sec.recommendations=schk('rptRecommendations',true);
+    sec.ssim=schk('rptEnableSsim',true);sec.gradient=schk('rptEnableGradient',true);
+    sec.phase=schk('rptEnablePhase',true);sec.structural=schk('rptEnableStructural',true);
+    sec.fourier=schk('rptEnableFourier',true);sec.glcm=schk('rptEnableGlcm',true);
+    sec.grad_bound=schk('rptGradBound',true);sec.phase_bound=schk('rptPhaseBound',true);
+    sec.summary=schk('rptSummary',true);sec.conclusion=schk('rptConclusion',true);sec.pattern_rec=schk('rptPatternRec',true);
+
     /* ── Score Cards ── */
     if(!isSingle){
         html+='<div class="rpt-scores">';
-        var colorLabel=result.color_method_label?'Color ('+result.color_method_label+')':'Color';
-        var patternLabel=result.pattern_method_label?'Pattern ('+result.pattern_method_label+')':'Pattern';
+        var colorLabel=result.color_method_label?t('rpt.score.color')+' ('+result.color_method_label+')':t('rpt.score.color');
+        var patternLabel=result.pattern_method_label?t('rpt.score.pattern')+' ('+result.pattern_method_label+')':t('rpt.score.pattern');
         html+=scoreCard(colorLabel,result.color_score,'color');
         html+=scoreCard(patternLabel,result.pattern_score,'pattern');
-        html+=scoreCard('Overall',result.overall_score,'overall');
+        html+=scoreCard(t('rpt.score.overall'),result.overall_score,'overall');
         html+='</div>';
     }
 
     /* ── Decision Badge ── */
     var dec=(result.decision||'COMPLETE').toUpperCase();
     var dc=dec==='ACCEPT'?'accept':(dec==='REJECT'?'reject':(dec==='COMPLETE'?'complete':'conditional'));
-    html+='<div class="rpt-decision-row"><span class="result-decision '+dc+'">'+dec+'</span></div>';
+    var decKey='rpt.decision.'+dec.toLowerCase();
+    var decLabel=t(decKey)!==decKey?t(decKey):dec;
+    html+='<div class="rpt-decision-row"><span class="result-decision '+dc+'">'+decLabel+'</span></div>';
 
     /* ── Download Buttons ── */
     html+='<div class="rpt-downloads">';
-    if(result.pdf_url)html+=dlLink(result.pdf_url+'?fn='+encodeURIComponent(result.fn_full||'Report.pdf'),'Full Report',result.fn_full||'Report.pdf');
-    if(result.color_report_url)html+=dlLink(result.color_report_url+'?fn='+encodeURIComponent(result.fn_color||'Color.pdf'),'Color Report',result.fn_color||'Color.pdf');
-    if(result.pattern_report_url)html+=dlLink(result.pattern_report_url+'?fn='+encodeURIComponent(result.fn_pattern||'Pattern.pdf'),'Pattern Report',result.fn_pattern||'Pattern.pdf');
-    if(result.receipt_url)html+=dlLink(result.receipt_url+'?fn='+encodeURIComponent(result.fn_receipt||'Receipt.pdf'),'Settings Receipt',result.fn_receipt||'Receipt.pdf');
+    if(result.pdf_url)html+=dlLink(result.pdf_url+'?fn='+encodeURIComponent(result.fn_full||'Report.pdf'),t('rpt.dl.full'),result.fn_full||'Report.pdf');
+    if(result.color_report_url)html+=dlLink(result.color_report_url+'?fn='+encodeURIComponent(result.fn_color||'Color.pdf'),t('rpt.dl.color'),result.fn_color||'Color.pdf');
+    if(result.pattern_report_url)html+=dlLink(result.pattern_report_url+'?fn='+encodeURIComponent(result.fn_pattern||'Pattern.pdf'),t('rpt.dl.pattern'),result.fn_pattern||'Pattern.pdf');
+    if(result.receipt_url)html+=dlLink(result.receipt_url+'?fn='+encodeURIComponent(result.fn_receipt||'Receipt.pdf'),t('rpt.dl.receipt'),result.fn_receipt||'Receipt.pdf');
     html+='</div>';
 
     /* ── Detailed Results (collapsible) ── */
@@ -1566,7 +1589,7 @@ function displayResults(result){
         }
         html+='</div>';
 
-        if(result.color_regions&&result.color_regions.length){
+        if(sec.diff_metrics&&result.color_regions&&result.color_regions.length){
             html+='<div class="rpt-section-title">'+t('rpt.regional.color.metrics')+'</div>';
             html+='<table class="rpt-table"><thead><tr><th>#</th><th>'+t('rpt.position')+'</th><th>\u0394E76</th><th>\u0394E94</th><th>\u0394E00</th><th>'+t('rpt.status')+'</th><th>'+t('rpt.ref.lab')+'</th><th>'+t('rpt.sam.lab')+'</th></tr></thead><tbody>';
             result.color_regions.forEach(function(r){
@@ -1584,21 +1607,23 @@ function displayResults(result){
         }
 
         /* ΔE Summary Statistics */
-        var deStats=result.de_statistics;
-        if(deStats&&(deStats.de76||deStats.de94||deStats.de00)){
-            html+='<div class="rpt-section-title">'+t('rpt.de.summary.stats')+'</div>';
-            html+='<table class="rpt-table"><thead><tr><th>'+t('rpt.metric')+'</th><th>'+t('rpt.average')+'</th><th>'+t('rpt.std.dev')+'</th><th>'+t('rpt.min')+'</th><th>'+t('rpt.max')+'</th></tr></thead><tbody>';
-            if(deStats.de76)html+='<tr><td>\u0394E76</td><td>'+deStats.de76.mean.toFixed(4)+'</td><td>'+deStats.de76.std.toFixed(4)+'</td><td>'+deStats.de76.min.toFixed(4)+'</td><td>'+deStats.de76.max.toFixed(4)+'</td></tr>';
-            if(deStats.de94)html+='<tr><td>\u0394E94</td><td>'+deStats.de94.mean.toFixed(4)+'</td><td>'+deStats.de94.std.toFixed(4)+'</td><td>'+deStats.de94.min.toFixed(4)+'</td><td>'+deStats.de94.max.toFixed(4)+'</td></tr>';
-            if(deStats.de00){
-                var de00C=deStats.de00.mean<=2?'good':(deStats.de00.mean<=5?'warn':'bad');
-                html+='<tr style="background:#f0fdf4"><td><strong>\u0394E2000</strong></td><td class="'+de00C+'"><strong>'+deStats.de00.mean.toFixed(4)+'</strong></td><td>'+deStats.de00.std.toFixed(4)+'</td><td>'+deStats.de00.min.toFixed(4)+'</td><td>'+deStats.de00.max.toFixed(4)+'</td></tr>';
+        if(sec.stats){
+            var deStats=result.de_statistics;
+            if(deStats&&(deStats.de76||deStats.de94||deStats.de00)){
+                html+='<div class="rpt-section-title">'+t('rpt.de.summary.stats')+'</div>';
+                html+='<table class="rpt-table"><thead><tr><th>'+t('rpt.metric')+'</th><th>'+t('rpt.average')+'</th><th>'+t('rpt.std.dev')+'</th><th>'+t('rpt.min')+'</th><th>'+t('rpt.max')+'</th></tr></thead><tbody>';
+                if(deStats.de76)html+='<tr><td>\u0394E76</td><td>'+deStats.de76.mean.toFixed(4)+'</td><td>'+deStats.de76.std.toFixed(4)+'</td><td>'+deStats.de76.min.toFixed(4)+'</td><td>'+deStats.de76.max.toFixed(4)+'</td></tr>';
+                if(deStats.de94)html+='<tr><td>\u0394E94</td><td>'+deStats.de94.mean.toFixed(4)+'</td><td>'+deStats.de94.std.toFixed(4)+'</td><td>'+deStats.de94.min.toFixed(4)+'</td><td>'+deStats.de94.max.toFixed(4)+'</td></tr>';
+                if(deStats.de00){
+                    var de00C=deStats.de00.mean<=2?'good':(deStats.de00.mean<=5?'warn':'bad');
+                    html+='<tr style="background:#f0fdf4"><td><strong>\u0394E2000</strong></td><td class="'+de00C+'"><strong>'+deStats.de00.mean.toFixed(4)+'</strong></td><td>'+deStats.de00.std.toFixed(4)+'</td><td>'+deStats.de00.min.toFixed(4)+'</td><td>'+deStats.de00.max.toFixed(4)+'</td></tr>';
+                }
+                html+='</tbody></table>';
             }
-            html+='</tbody></table>';
         }
 
         /* Illuminant Analysis */
-        if(result.illuminant_data&&result.illuminant_data.length){
+        if(sec.illuminant_analysis&&result.illuminant_data&&result.illuminant_data.length){
             html+='<div class="rpt-section-title">'+t('rpt.illuminant.analysis')+'</div>';
             html+='<table class="rpt-table"><thead><tr><th>'+t('rpt.illuminant.analysis')+'</th><th>'+t('rpt.mean.de00')+'</th><th>CSI</th><th>'+t('rpt.status')+'</th></tr></thead><tbody>';
             result.illuminant_data.forEach(function(ill){
@@ -1610,20 +1635,23 @@ function displayResults(result){
         }
 
         /* Color Visualization Images */
-        var colorImgs=[
-            {key:'heatmap',title:t('rpt.de.heatmap'),caption:t('rpt.de.heatmap.caption')},
-            {key:'spectral',title:t('rpt.spectral.dist'),caption:t('rpt.spectral.dist.caption')},
-            {key:'histograms',title:t('rpt.rgb.histograms'),caption:t('rpt.rgb.histograms.caption')},
-            {key:'lab_scatter',title:t('rpt.lab.scatter'),caption:t('rpt.lab.scatter.caption')},
-            {key:'lab_bars',title:t('rpt.lab.bars'),caption:t('rpt.lab.bars.caption')}
-        ];
-        html+=renderImageGallery(imgs,colorImgs);
+        if(sec.visualizations){
+            var colorImgs=[];
+            if(sec.visual_diff)colorImgs.push({key:'heatmap',title:t('rpt.de.heatmap'),caption:t('rpt.de.heatmap.caption')});
+            if(sec.spectral)colorImgs.push({key:'spectral',title:t('rpt.spectral.dist'),caption:t('rpt.spectral.dist.caption')});
+            if(sec.histograms)colorImgs.push({key:'histograms',title:t('rpt.rgb.histograms'),caption:t('rpt.rgb.histograms.caption')});
+            if(sec.detailed_lab)colorImgs.push({key:'lab_scatter',title:t('rpt.lab.scatter'),caption:t('rpt.lab.scatter.caption')});
+            if(sec.detailed_lab)colorImgs.push({key:'lab_bars',title:t('rpt.lab.bars'),caption:t('rpt.lab.bars.caption')});
+            if(colorImgs.length)html+=renderImageGallery(imgs,colorImgs);
+        }
 
         html+=collapsibleEnd();
 
         /* ══════════════════════════════════════
-           PATTERN ANALYSIS SECTION — expanded
+           PATTERN ANALYSIS SECTION — only if any pattern method enabled
            ══════════════════════════════════════ */
+        var anyPattern=sec.ssim||sec.gradient||sec.phase||sec.structural;
+        if(anyPattern){
         html+=collapsibleStart('pattern-detail',t('rpt.pattern.analysis'),iconSvg('pattern'));
 
         /* Pattern key metrics row */
@@ -1636,7 +1664,7 @@ function displayResults(result){
             html+='<div class="rpt-kpi"><span class="rpt-kpi-label">'+t('rpt.status')+'</span><span class="rpt-status-badge '+pStCls+'">'+pSt+'</span></div>';
         }
         var sm2=result.structural_meta;
-        if(sm2&&sm2.verdict){
+        if(sec.structural&&sm2&&sm2.verdict){
             var svCls=sm2.similarity_score>=99?'good':(sm2.similarity_score>=95?'warn':'bad');
             html+='<div class="rpt-kpi"><span class="rpt-kpi-label">'+t('rpt.structural.label')+'</span><span class="rpt-kpi-value '+svCls+'">'+sm2.similarity_score.toFixed(1)+'%</span></div>';
         }
@@ -1654,47 +1682,56 @@ function displayResults(result){
         }
 
         /* Structural diff metadata */
-        if(sm2&&sm2.verdict){
+        if(sec.structural&&sm2&&sm2.verdict){
             html+='<div class="rpt-section-title">'+t('rpt.structural.difference')+'</div>';
             html+='<div class="rpt-stat-row"><span class="rpt-stat-label">'+t('rpt.similarity.score')+'</span><span class="rpt-stat-value">'+sm2.similarity_score.toFixed(2)+'%</span></div>';
             html+='<div class="rpt-stat-row"><span class="rpt-stat-label">'+t('rpt.change.percentage')+'</span><span class="rpt-stat-value">'+(sm2.change_percentage!==undefined?sm2.change_percentage.toFixed(4)+'%':'\u2014')+'</span></div>';
             html+='<div class="rpt-stat-row"><span class="rpt-stat-label">'+t('rpt.verdict')+'</span><span class="rpt-status-badge '+(sm2.similarity_score>=99?'good':(sm2.similarity_score>=95?'warn':'bad'))+'">'+sm2.verdict+'</span></div>';
         }
 
-        /* Pattern Visualization Images */
-        html+='<div class="rpt-section-title">'+t('rpt.difference.maps')+'</div>';
-        html+=renderImageGallery(imgs,[
-            {key:'structural_ssim',title:t('rpt.ssim.map'),caption:t('rpt.ssim.map.caption')},
-            {key:'gradient_similarity',title:t('rpt.gradient.map'),caption:t('rpt.gradient.map.caption')},
-            {key:'phase_correlation',title:t('rpt.phase.map'),caption:t('rpt.phase.map.caption')}
-        ]);
+        /* Pattern Visualization Images — filtered by enabled methods */
+        var diffMaps=[];
+        if(sec.ssim)diffMaps.push({key:'structural_ssim',title:t('rpt.ssim.map'),caption:t('rpt.ssim.map.caption')});
+        if(sec.gradient)diffMaps.push({key:'gradient_similarity',title:t('rpt.gradient.map'),caption:t('rpt.gradient.map.caption')});
+        if(sec.phase)diffMaps.push({key:'phase_correlation',title:t('rpt.phase.map'),caption:t('rpt.phase.map.caption')});
+        if(diffMaps.length){
+            html+='<div class="rpt-section-title">'+t('rpt.difference.maps')+'</div>';
+            html+=renderImageGallery(imgs,diffMaps);
+        }
 
-        html+='<div class="rpt-section-title">'+t('rpt.boundary.detection')+'</div>';
-        html+=renderImageGallery(imgs,[
-            {key:'gradient_boundary',title:t('rpt.gradient.boundary'),caption:t('rpt.gradient.boundary.caption')},
-            {key:'gradient_filled',title:t('rpt.gradient.filled'),caption:t('rpt.gradient.filled.caption')},
-            {key:'phase_boundary',title:t('rpt.phase.boundary'),caption:t('rpt.phase.boundary.caption')},
-            {key:'phase_filled',title:t('rpt.phase.filled'),caption:t('rpt.phase.filled.caption')}
-        ]);
+        var boundImgs=[];
+        if(sec.grad_bound){
+            boundImgs.push({key:'gradient_boundary',title:t('rpt.gradient.boundary'),caption:t('rpt.gradient.boundary.caption')});
+            boundImgs.push({key:'gradient_filled',title:t('rpt.gradient.filled'),caption:t('rpt.gradient.filled.caption')});
+        }
+        if(sec.phase_bound){
+            boundImgs.push({key:'phase_boundary',title:t('rpt.phase.boundary'),caption:t('rpt.phase.boundary.caption')});
+            boundImgs.push({key:'phase_filled',title:t('rpt.phase.filled'),caption:t('rpt.phase.filled.caption')});
+        }
+        if(boundImgs.length){
+            html+='<div class="rpt-section-title">'+t('rpt.boundary.detection')+'</div>';
+            html+=renderImageGallery(imgs,boundImgs);
+        }
 
-        html+='<div class="rpt-section-title">'+t('rpt.structural.analysis')+'</div>';
-        html+=renderImageGallery(imgs,[
-            {key:'structural_subplot',title:t('rpt.multi.method'),caption:t('rpt.multi.method.caption')},
-            {key:'structural_pure',title:t('rpt.pure.diff'),caption:t('rpt.pure.diff.caption')}
-        ]);
+        if(sec.structural){
+            html+='<div class="rpt-section-title">'+t('rpt.structural.analysis')+'</div>';
+            html+=renderImageGallery(imgs,[
+                {key:'structural_subplot',title:t('rpt.multi.method'),caption:t('rpt.multi.method.caption')},
+                {key:'structural_pure',title:t('rpt.pure.diff'),caption:t('rpt.pure.diff.caption')}
+            ]);
+        }
 
         html+=collapsibleEnd();
+        } /* end anyPattern */
 
         /* ══════════════════════════════════════
-           TEXTURE & FREQUENCY ANALYSIS — expanded
+           TEXTURE & FREQUENCY ANALYSIS — filtered
            ══════════════════════════════════════ */
-        var hasTexture=imgs.fourier_spectrum||imgs.glcm_heatmap;
-        if(hasTexture){
+        var textureImgs=[];
+        if(sec.fourier&&imgs.fourier_spectrum)textureImgs.push({key:'fourier_spectrum',title:t('rpt.fourier.fft'),caption:t('rpt.fourier.fft.caption')});
+        if(sec.glcm&&imgs.glcm_heatmap)textureImgs.push({key:'glcm_heatmap',title:t('rpt.glcm.heatmap'),caption:t('rpt.glcm.heatmap.caption')});
+        if(textureImgs.length){
             html+=collapsibleStart('texture-detail',t('rpt.texture.frequency'),iconSvg('texture'));
-            var textureImgs=[
-                {key:'fourier_spectrum',title:t('rpt.fourier.fft'),caption:t('rpt.fourier.fft.caption')},
-                {key:'glcm_heatmap',title:t('rpt.glcm.heatmap'),caption:t('rpt.glcm.heatmap.caption')}
-            ];
             html+=renderImageGallery(imgs,textureImgs);
             html+=collapsibleEnd();
         }
@@ -1706,12 +1743,11 @@ function displayResults(result){
         html+=collapsibleStart('single-detail',t('rpt.single.image.analysis'),iconSvg('single'));
         html+='<div class="rpt-stat-row"><span class="rpt-stat-label">'+t('rpt.mode.label')+'</span><span class="rpt-stat-value">'+t('rpt.single.image.mode')+'</span></div>';
 
-        var singleImgs=[
-            {key:'histogram_single',title:t('rpt.histogram.single'),caption:t('rpt.histogram.single.caption')},
-            {key:'spectral_single',title:t('rpt.spectral.single'),caption:t('rpt.spectral.single.caption')},
-            {key:'fourier_single',title:t('rpt.fourier.single'),caption:t('rpt.fourier.single.caption')}
-        ];
-        html+=renderImageGallery(imgs,singleImgs);
+        var singleImgs=[];
+        if(sec.histograms)singleImgs.push({key:'histogram_single',title:t('rpt.histogram.single'),caption:t('rpt.histogram.single.caption')});
+        if(sec.spectral)singleImgs.push({key:'spectral_single',title:t('rpt.spectral.single'),caption:t('rpt.spectral.single.caption')});
+        if(sec.fourier)singleImgs.push({key:'fourier_single',title:t('rpt.fourier.single'),caption:t('rpt.fourier.single.caption')});
+        if(singleImgs.length)html+=renderImageGallery(imgs,singleImgs);
         html+=collapsibleEnd();
     }
 
