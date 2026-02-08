@@ -1,0 +1,43 @@
+# =============================================================================
+# SpectraMatch — .htaccess for JPaaS (Apache + mod_wsgi)
+# =============================================================================
+#
+# This file configures directives that .htaccess is allowed to set.
+# NOTE: WSGIDaemonProcess / WSGIProcessGroup / WSGIApplicationGroup directives
+# can ONLY be set in server config (httpd.conf), NOT in .htaccess.
+# See jpaas/httpd-wsgi.conf for those critical directives.
+#
+# This file handles: timeouts, request limits, and error handling.
+# =============================================================================
+
+# --- Request Timeout (Apache core) ---
+# Allow up to 10 minutes for a single request/response cycle.
+# This must also be set in httpd.conf; .htaccess may not override it on all
+# JPaaS configurations.  Included here as a safety net.
+<IfModule mod_reqtimeout.c>
+    RequestReadTimeout header=60 body=600
+</IfModule>
+
+# --- Disable MultiViews to avoid content-negotiation conflicts ---
+Options -MultiViews
+
+# --- Deny access to hidden/internal files ---
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# --- Deny access to Python source files ---
+<FilesMatch "\.(py|pyc|pyo)$">
+    Require all denied
+</FilesMatch>
+
+# --- Allow .well-known for SSL certificate renewal ---
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule "^\.well-known/" - [L]
+</IfModule>
+
+# --- Compress text responses ---
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE application/json text/html text/css application/javascript
+</IfModule>

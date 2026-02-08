@@ -1,17 +1,23 @@
 """SpectraMatch web app (Flask).
 
-JPaaS often runs behind Apache/mod_wsgi with relatively strict startup timeouts.
-Importing heavy native packages (opencv/numpy/reportlab) at module import time can
-delay the first request and trigger: "Timeout when reading response headers".
+Deployed on JPaaS behind NGINX -> Apache -> mod_wsgi (Python 3.11).
 
-To keep the WSGI import fast, we *lazy-import* heavy dependencies inside the
-request handler(s).
+Heavy C-extension libraries (OpenCV, NumPy, matplotlib, reportlab) are now
+pre-imported at WSGI startup time in wsgi.py, so lazy-imports inside request
+handlers are kept only as a defensive fallback.
+
+Background threads are NOT used because mod_wsgi daemon mode can recycle
+the process at any time; cleanup is request-driven instead.
+
+See jpaas/httpd-wsgi.conf and jpaas/nginx-proxy.conf for the server-side
+configuration that makes this work (timeouts, single process, global
+interpreter).
 """
 
 from flask import Flask, render_template, request, send_file, jsonify
 import os
 import time
-import threading
+import gc
 
 import json
 import uuid
@@ -41,9 +47,15 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # Set max upload size to 100MB to avoid generic connection resets on huge files
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
 
-# Temp file cleanup configuration
+# ---------------------------------------------------------------------------
+# Temp-file cleanup — request-driven (no background threads)
+# ---------------------------------------------------------------------------
+# mod_wsgi daemon mode can recycle the process at any time; a background
+# thread with time.sleep() can prevent clean shutdown and leak resources.
+# Instead, cleanup runs at most once per hour, triggered by incoming requests.
 TEMP_FILE_MAX_AGE_HOURS = 24  # Delete files older than 24 hours
-CLEANUP_INTERVAL_SECONDS = 3600  # Run cleanup every hour
+_CLEANUP_INTERVAL_SECONDS = 3600  # Run cleanup at most once per hour
+_last_cleanup_time = 0.0  # epoch; forces cleanup on first request
 
 def cleanup_old_temp_files():
     """Remove temporary files older than TEMP_FILE_MAX_AGE_HOURS."""
@@ -64,19 +76,47 @@ def cleanup_old_temp_files():
     except Exception as e:
         print(f"Error during temp file cleanup: {e}")
 
-def start_cleanup_scheduler():
-    """Start a background thread for periodic cleanup."""
-    def cleanup_loop():
-        while True:
-            time.sleep(CLEANUP_INTERVAL_SECONDS)
-            cleanup_old_temp_files()
-    
-    cleanup_thread = threading.Thread(target=cleanup_loop, daemon=True)
-    cleanup_thread.start()
+def _maybe_cleanup():
+    """Run cleanup if enough time has elapsed since the last run."""
+    global _last_cleanup_time
+    now = time.time()
+    if now - _last_cleanup_time >= _CLEANUP_INTERVAL_SECONDS:
+        _last_cleanup_time = now
+        cleanup_old_temp_files()
 
-# Run initial cleanup on startup and start scheduler
-cleanup_old_temp_files()
-start_cleanup_scheduler()
+@app.before_request
+def _before_request_hook():
+    """Lightweight per-request housekeeping (no threads)."""
+    _maybe_cleanup()
+
+# ---------------------------------------------------------------------------
+# Image dimension cap — memory safety on limited JPaaS cloudlets
+# ---------------------------------------------------------------------------
+# A 10000x8000 BGR uint8 image = ~230 MB.  Multiple copies during analysis
+# (float64 conversions, LAB, gradient maps) can 4-8x that.  On a 1-2 GB
+# cloudlet this causes OOM and process kills.
+#
+# MAX_IMAGE_DIMENSION caps the longest edge.  The image is downscaled with
+# INTER_AREA (best for downsampling) preserving aspect ratio.  Set to 0 to
+# disable capping entirely.
+MAX_IMAGE_DIMENSION = int(os.environ.get('SPECTRAMATCH_MAX_DIM', '6000'))
+
+def _cap_image_dimension(img):
+    """Downscale *img* so its longest edge <= MAX_IMAGE_DIMENSION.
+    Returns the (possibly resized) image and the scale factor applied."""
+    if MAX_IMAGE_DIMENSION <= 0:
+        return img, 1.0
+    import cv2
+    h, w = img.shape[:2]
+    longest = max(h, w)
+    if longest <= MAX_IMAGE_DIMENSION:
+        return img, 1.0
+    scale = MAX_IMAGE_DIMENSION / longest
+    new_w = int(w * scale)
+    new_h = int(h * scale)
+    print(f"[SpectraMatch] Capping image from {w}x{h} to {new_w}x{new_h} "
+          f"(scale={scale:.4f}, MAX_IMAGE_DIMENSION={MAX_IMAGE_DIMENSION})")
+    return cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA), scale
 
 def crop_image(image, region_data):
     """
@@ -218,18 +258,25 @@ def analyze():
         sample_bytes = sample_file.read()
         sample_arr = np.frombuffer(sample_bytes, np.uint8)
         sample_img = cv2.imdecode(sample_arr, cv2.IMREAD_COLOR)
+        del sample_bytes, sample_arr  # free compressed buffer immediately
         
         ref_img = None
         if not single_image_mode:
             ref_bytes = ref_file.read()
             ref_arr = np.frombuffer(ref_bytes, np.uint8)
             ref_img = cv2.imdecode(ref_arr, cv2.IMREAD_COLOR)
+            del ref_bytes, ref_arr
         
         if sample_img is None:
             return jsonify({'error': 'Invalid sample image format'}), 400
             
         if not single_image_mode and ref_img is None:
              return jsonify({'error': 'Invalid reference image format'}), 400
+
+        # Cap image dimensions for memory safety on JPaaS cloudlets
+        sample_img, _s_scale = _cap_image_dimension(sample_img)
+        if ref_img is not None:
+            ref_img, _r_scale = _cap_image_dimension(ref_img)
             
         # Get dimensions for validation and offset calculation
         if single_image_mode:
@@ -748,6 +795,11 @@ def analyze():
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+    finally:
+        # Reclaim memory after heavy image processing.  On a 1–2 GB JPaaS
+        # cloudlet every MB matters; without an explicit collect() the large
+        # NumPy arrays can linger until the next GC cycle.
+        gc.collect()
         
 @app.route('/api/download_receipt/<session_id>', methods=['GET'])
 def download_receipt(session_id):
