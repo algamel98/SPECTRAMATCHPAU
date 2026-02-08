@@ -7,16 +7,9 @@
 # can ONLY be set in server config (httpd.conf), NOT in .htaccess.
 # See jpaas/httpd-wsgi.conf for those critical directives.
 #
-# This file handles: timeouts, request limits, and error handling.
+# NOTE: RequestReadTimeout is a server-level directive and is NOT allowed in
+# .htaccess on JPaaS.  Set it in httpd.conf instead (see jpaas/httpd-wsgi.conf).
 # =============================================================================
-
-# --- Request Timeout (Apache core) ---
-# Allow up to 10 minutes for a single request/response cycle.
-# This must also be set in httpd.conf; .htaccess may not override it on all
-# JPaaS configurations.  Included here as a safety net.
-<IfModule mod_reqtimeout.c>
-    RequestReadTimeout header=60 body=600
-</IfModule>
 
 # --- Disable MultiViews to avoid content-negotiation conflicts ---
 Options -MultiViews
