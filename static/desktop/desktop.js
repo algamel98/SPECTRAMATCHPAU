@@ -2152,6 +2152,16 @@ function resetToDefault(){
     });
 }
 
+/* ═══ Settings Input Validation ═══ */
+document.addEventListener('change',function(e){
+    var el=e.target;
+    if(el.tagName!=='INPUT'||el.type!=='number')return;
+    var mn=parseFloat(el.min),mx=parseFloat(el.max),v=parseFloat(el.value);
+    if(isNaN(v)){el.value=el.defaultValue;return;}
+    if(!isNaN(mn)&&v<mn)el.value=mn;
+    if(!isNaN(mx)&&v>mx)el.value=mx;
+});
+
 /* ═══ Public API (for inline onclick) ═══ */
 return {closeAlert:function(){$('alertDialog').style.display='none';},
         saveAs:saveAsDownload,

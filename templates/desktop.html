@@ -335,17 +335,17 @@
                     <div class="prop-section-body">
                         <div class="prop-row"><label data-i18n="prop.scoring.basis">Scoring Basis</label><select id="propColorScoringMethod"><option value="delta_e" selected>Delta E 2000</option><option value="csi">CSI</option><option value="csi2000">CSI2000</option></select></div>
                         <div class="prop-separator"></div>
-                        <div class="prop-row"><label data-i18n="prop.pass.thresh">Pass Threshold</label><input type="number" id="propColorPass" value="2.0" step="0.1"></div>
-                        <div class="prop-row"><label data-i18n="prop.cond.thresh">Conditional</label><input type="number" id="propColorCond" value="5.0" step="0.1"></div>
-                        <div class="prop-row"><label data-i18n="prop.global.accept">Global Accept.</label><input type="number" id="propColorGlobal" value="5.0" step="0.1"></div>
-                        <div class="prop-row"><label data-i18n="prop.csi.good">CSI Good</label><input type="number" id="propCsiGood" value="90.0" step="1"></div>
-                        <div class="prop-row"><label data-i18n="prop.csi.warn">CSI Warning</label><input type="number" id="propCsiWarn" value="70.0" step="1"></div>
+                        <div class="prop-row"><label data-i18n="prop.pass.thresh">Pass Threshold</label><input type="number" id="propColorPass" value="2.0" step="0.1" min="0.1" max="20.0"></div>
+                        <div class="prop-row"><label data-i18n="prop.cond.thresh">Conditional</label><input type="number" id="propColorCond" value="5.0" step="0.1" min="0.1" max="20.0"></div>
+                        <div class="prop-row"><label data-i18n="prop.global.accept">Global Accept.</label><input type="number" id="propColorGlobal" value="5.0" step="0.1" min="0.1" max="20.0"></div>
+                        <div class="prop-row"><label data-i18n="prop.csi.good">CSI Good</label><input type="number" id="propCsiGood" value="90.0" step="0.1" min="0.1" max="99.9"></div>
+                        <div class="prop-row"><label data-i18n="prop.csi.warn">CSI Warning</label><input type="number" id="propCsiWarn" value="70.0" step="0.1" min="0.1" max="99.9"></div>
                         <div class="prop-row"><label data-i18n="prop.sampling.count">Sampling Count</label><input type="number" id="propRegionCount" value="5" min="1" max="100"></div>
                         <div class="prop-separator"></div>
-                        <div class="prop-row"><label data-i18n="prop.lab.thresh.dl">ΔL* Threshold</label><input type="number" id="propLabDL" value="1.0" step="0.1" min="0.1"></div>
-                        <div class="prop-row"><label data-i18n="prop.lab.thresh.da">Δa* Threshold</label><input type="number" id="propLabDA" value="1.0" step="0.1" min="0.1"></div>
-                        <div class="prop-row"><label data-i18n="prop.lab.thresh.db">Δb* Threshold</label><input type="number" id="propLabDB" value="1.0" step="0.1" min="0.1"></div>
-                        <div class="prop-row"><label data-i18n="prop.lab.thresh.mag">Magnitude Threshold</label><input type="number" id="propLabMag" value="2.0" step="0.1" min="0.1"></div>
+                        <div class="prop-row"><label data-i18n="prop.lab.thresh.dl">ΔL* Threshold</label><input type="number" id="propLabDL" value="1.0" step="0.1" min="0.1" max="10.0"></div>
+                        <div class="prop-row"><label data-i18n="prop.lab.thresh.da">Δa* Threshold</label><input type="number" id="propLabDA" value="1.0" step="0.1" min="0.1" max="10.0"></div>
+                        <div class="prop-row"><label data-i18n="prop.lab.thresh.db">Δb* Threshold</label><input type="number" id="propLabDB" value="1.0" step="0.1" min="0.1" max="10.0"></div>
+                        <div class="prop-row"><label data-i18n="prop.lab.thresh.mag">Magnitude Threshold</label><input type="number" id="propLabMag" value="2.0" step="0.1" min="0.1" max="20.0"></div>
                     </div>
                 </div>
 
@@ -391,11 +391,11 @@
                     <div class="prop-section-body">
                         <div class="prop-row"><label data-i18n="prop.scoring.basis">Scoring Basis</label><select id="propPatternScoringMethod"><option value="all" selected>All (Average)</option><option value="ssim">Structural SSIM</option><option value="gradient">Gradient Similarity</option><option value="phase">Phase Correlation</option><option value="structural">Structural Match</option></select></div>
                         <div class="prop-separator"></div>
-                        <div class="prop-row-dual"><label>SSIM</label><input type="number" id="propSsimPass" value="85.0" step="1" placeholder="Pass"><input type="number" id="propSsimCond" value="70.0" step="1" placeholder="Cond"></div>
-                        <div class="prop-row-dual"><label data-i18n="prop.gradient">Gradient</label><input type="number" id="propGradPass" value="85.0" step="1" placeholder="Pass"><input type="number" id="propGradCond" value="70.0" step="1" placeholder="Cond"></div>
-                        <div class="prop-row-dual"><label data-i18n="prop.phase">Phase</label><input type="number" id="propPhasePass" value="85.0" step="1" placeholder="Pass"><input type="number" id="propPhaseCond" value="70.0" step="1" placeholder="Cond"></div>
-                        <div class="prop-row-dual"><label data-i18n="prop.structural.match">Structural</label><input type="number" id="propStructuralPass" value="85.0" step="1" placeholder="Pass"><input type="number" id="propStructuralCond" value="70.0" step="1" placeholder="Cond"></div>
-                        <div class="prop-row"><label data-i18n="prop.global.thresh">Global Thresh.</label><input type="number" id="propPatternGlobal" value="75.0" step="1"></div>
+                        <div class="prop-row-dual"><label>SSIM</label><input type="number" id="propSsimPass" value="85.0" step="0.1" min="0.1" max="99.9" placeholder="Pass"><input type="number" id="propSsimCond" value="70.0" step="0.1" min="0.1" max="99.9" placeholder="Cond"></div>
+                        <div class="prop-row-dual"><label data-i18n="prop.gradient">Gradient</label><input type="number" id="propGradPass" value="85.0" step="0.1" min="0.1" max="99.9" placeholder="Pass"><input type="number" id="propGradCond" value="70.0" step="0.1" min="0.1" max="99.9" placeholder="Cond"></div>
+                        <div class="prop-row-dual"><label data-i18n="prop.phase">Phase</label><input type="number" id="propPhasePass" value="85.0" step="0.1" min="0.1" max="99.9" placeholder="Pass"><input type="number" id="propPhaseCond" value="70.0" step="0.1" min="0.1" max="99.9" placeholder="Cond"></div>
+                        <div class="prop-row-dual"><label data-i18n="prop.structural.match">Structural</label><input type="number" id="propStructuralPass" value="85.0" step="0.1" min="0.1" max="99.9" placeholder="Pass"><input type="number" id="propStructuralCond" value="70.0" step="0.1" min="0.1" max="99.9" placeholder="Cond"></div>
+                        <div class="prop-row"><label data-i18n="prop.global.thresh">Global Thresh.</label><input type="number" id="propPatternGlobal" value="75.0" step="0.1" min="0.1" max="99.9"></div>
                     </div>
                 </div>
 

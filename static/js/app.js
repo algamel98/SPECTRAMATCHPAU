@@ -4777,6 +4777,21 @@ function closeDlFallback() {
 }
 
 // ==========================================
+// Settings Input Validation
+// ==========================================
+(function enforceSettingsLimits() {
+    document.addEventListener('change', function(e) {
+        var el = e.target;
+        if (el.tagName !== 'INPUT' || el.type !== 'number') return;
+        var min = parseFloat(el.min);
+        var max = parseFloat(el.max);
+        var val = parseFloat(el.value);
+        if (isNaN(val)) { el.value = el.defaultValue; return; }
+        if (!isNaN(min) && val < min) el.value = min;
+        if (!isNaN(max) && val > max) el.value = max;
+    });
+})();
+
 // Contact Popup
 // ==========================================
 function initContactPopup() {

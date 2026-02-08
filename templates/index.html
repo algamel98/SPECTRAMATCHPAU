@@ -1111,21 +1111,21 @@
                                 <label data-i18n="pass.threshold">Pass Threshold</label>
                                 <small data-i18n="values.below.accepted">Values below this are accepted</small>
                             </div>
-                            <input type="number" id="color_pass_thresh" class="form-control" value="2.0" step="0.1">
+                            <input type="number" id="color_pass_thresh" class="form-control" value="2.0" step="0.1" min="0.1" max="20.0">
                         </div>
                         <div class="setting-row">
                             <div class="setting-label">
                                 <label data-i18n="conditional.threshold">Conditional Threshold</label>
                                 <small data-i18n="values.below.warning">Values below this are warning (if above pass)</small>
                             </div>
-                            <input type="number" id="color_cond_thresh" class="form-control" value="5.0" step="0.1">
+                            <input type="number" id="color_cond_thresh" class="form-control" value="5.0" step="0.1" min="0.1" max="20.0">
                         </div>
                         <div class="setting-row">
                             <div class="setting-label">
                                 <label data-i18n="global.acceptance">Global Acceptance</label>
                                 <small data-i18n="overall.color.score">Overall image color score threshold</small>
                             </div>
-                            <input type="number" id="color_global_thresh" class="form-control" value="5.0" step="0.1">
+                            <input type="number" id="color_global_thresh" class="form-control" value="5.0" step="0.1" min="0.1" max="20.0">
                         </div>
 
                         <div class="settings-group-header" style="margin-top: 20px;">
@@ -1136,7 +1136,7 @@
                             <div class="setting-label"><label data-i18n="csi.good.threshold">CSI Good Threshold</label><small data-i18n="above.this.green">Above this =
                                     Green</small></div>
                             <div style="display: flex; gap: 8px;">
-                                <input type="number" id="csi_good" class="form-control" value="90.0"
+                                <input type="number" id="csi_good" class="form-control" value="90.0" step="0.1" min="0.1" max="99.9"
                                     style="width: 80px;">
                             </div>
                         </div>
@@ -1144,7 +1144,7 @@
                             <div class="setting-label"><label data-i18n="csi.warning.threshold">CSI Warning Threshold</label><small data-i18n="above.this.orange">Above this =
                                     Orange</small></div>
                             <div style="display: flex; gap: 8px;">
-                                <input type="number" id="csi_warn" class="form-control" value="70.0"
+                                <input type="number" id="csi_warn" class="form-control" value="70.0" step="0.1" min="0.1" max="99.9"
                                     style="width: 80px;">
                             </div>
                         </div>
@@ -1155,19 +1155,19 @@
                         <p class="settings-group-desc" data-i18n="lab.thresholds.desc">Define component-level thresholds for Lab* quality assessment.</p>
                         <div class="setting-row">
                             <div class="setting-label"><label data-i18n="lab.thresh.dl">ΔL* Threshold</label><small data-i18n="lab.thresh.dl.desc">Lightness tolerance</small></div>
-                            <input type="number" id="lab_thresh_dl" class="form-control" value="1.0" step="0.1" min="0.1" style="width: 80px;">
+                            <input type="number" id="lab_thresh_dl" class="form-control" value="1.0" step="0.1" min="0.1" max="10.0" style="width: 80px;">
                         </div>
                         <div class="setting-row">
                             <div class="setting-label"><label data-i18n="lab.thresh.da">Δa* Threshold</label><small data-i18n="lab.thresh.da.desc">Red-green axis tolerance</small></div>
-                            <input type="number" id="lab_thresh_da" class="form-control" value="1.0" step="0.1" min="0.1" style="width: 80px;">
+                            <input type="number" id="lab_thresh_da" class="form-control" value="1.0" step="0.1" min="0.1" max="10.0" style="width: 80px;">
                         </div>
                         <div class="setting-row">
                             <div class="setting-label"><label data-i18n="lab.thresh.db">Δb* Threshold</label><small data-i18n="lab.thresh.db.desc">Yellow-blue axis tolerance</small></div>
-                            <input type="number" id="lab_thresh_db" class="form-control" value="1.0" step="0.1" min="0.1" style="width: 80px;">
+                            <input type="number" id="lab_thresh_db" class="form-control" value="1.0" step="0.1" min="0.1" max="10.0" style="width: 80px;">
                         </div>
                         <div class="setting-row">
                             <div class="setting-label"><label data-i18n="lab.thresh.mag">Magnitude Threshold</label><small data-i18n="lab.thresh.mag.desc">Combined ΔLab vector magnitude</small></div>
-                            <input type="number" id="lab_thresh_mag" class="form-control" value="2.0" step="0.1" min="0.1" style="width: 80px;">
+                            <input type="number" id="lab_thresh_mag" class="form-control" value="2.0" step="0.1" min="0.1" max="20.0" style="width: 80px;">
                         </div>
 
                         <!-- Sampling Section (Standalone Unit) -->
@@ -1273,9 +1273,9 @@
                                     Conditional</small>
                             </div>
                             <div style="display: flex; gap: 8px;">
-                                <input type="number" id="ssim_pass" class="form-control" value="85.0"
+                                <input type="number" id="ssim_pass" class="form-control" value="85.0" step="0.1" min="0.1" max="99.9"
                                     style="width: 70px;" placeholder="Pass">
-                                <input type="number" id="ssim_cond" class="form-control" value="70.0"
+                                <input type="number" id="ssim_cond" class="form-control" value="70.0" step="0.1" min="0.1" max="99.9"
                                     style="width: 70px;" placeholder="Cond">
                             </div>
                         </div>
@@ -1283,9 +1283,9 @@
                             <div class="setting-label"><label data-i18n="gradient.similarity">Gradient Similarity</label><small data-i18n="pass.conditional">Pass /
                                     Conditional</small></div>
                             <div style="display: flex; gap: 8px;">
-                                <input type="number" id="grad_pass" class="form-control" value="85.0"
+                                <input type="number" id="grad_pass" class="form-control" value="85.0" step="0.1" min="0.1" max="99.9"
                                     style="width: 70px;">
-                                <input type="number" id="grad_cond" class="form-control" value="70.0"
+                                <input type="number" id="grad_cond" class="form-control" value="70.0" step="0.1" min="0.1" max="99.9"
                                     style="width: 70px;">
                             </div>
                         </div>
@@ -1296,8 +1296,8 @@
                                 Conditional</small>
                         </div>
                         <div style="display: flex; gap: 8px;">
-                            <input type="number" id="phase_pass" class="form-control" value="85.0" style="width: 70px;">
-                            <input type="number" id="phase_cond" class="form-control" value="70.0" style="width: 70px;">
+                            <input type="number" id="phase_pass" class="form-control" value="85.0" step="0.1" min="0.1" max="99.9" style="width: 70px;">
+                            <input type="number" id="phase_cond" class="form-control" value="70.0" step="0.1" min="0.1" max="99.9" style="width: 70px;">
                         </div>
                     </div>
                     <div class="setting-row">
@@ -1305,14 +1305,14 @@
                                 Conditional</small>
                         </div>
                         <div style="display: flex; gap: 8px;">
-                            <input type="number" id="structural_pass" class="form-control" value="85.0" style="width: 70px;">
-                            <input type="number" id="structural_cond" class="form-control" value="70.0" style="width: 70px;">
+                            <input type="number" id="structural_pass" class="form-control" value="85.0" step="0.1" min="0.1" max="99.9" style="width: 70px;">
+                            <input type="number" id="structural_cond" class="form-control" value="70.0" step="0.1" min="0.1" max="99.9" style="width: 70px;">
                         </div>
                     </div>
                     <div class="setting-row">
                         <div class="setting-label"><label data-i18n="global.pattern.score">Global Pattern Score</label><small data-i18n="overall.pass.threshold">Overall pass
                                 threshold</small></div>
-                        <input type="number" id="pattern_global_thresh" class="form-control" value="75.0">
+                        <input type="number" id="pattern_global_thresh" class="form-control" value="75.0" step="0.1" min="0.1" max="99.9">
                     </div>
                 </div>
 
