@@ -555,6 +555,15 @@ var RegionSelector = (function () {
     function showSelection() {
         if (!state.enabled) return;
 
+        // Pen mode uses its own canvas — skip standard overlays and dimmers
+        if (state.shape === 'pen') {
+            if (elements.refOverlay) elements.refOverlay.classList.remove('placed');
+            if (elements.testOverlay) elements.testOverlay.classList.remove('placed');
+            if (elements.refDimmer) elements.refDimmer.classList.remove('active');
+            if (elements.testDimmer) elements.testDimmer.classList.remove('active');
+            return;
+        }
+
         // Show overlays
         if (elements.refOverlay) {
             elements.refOverlay.style.display = '';
