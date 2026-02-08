@@ -423,14 +423,6 @@ def generate_receipt(pdf_path, settings, processed_images, report_id, operator_n
     
     # Table for Results
     if mode == "single":
-        # Just Decision (maybe) + Overall? Or just "Analysis Complete"?
-        # User said: "Download produces exactly one report... match existing style"
-        # Since we don't have Color/Pattern separate scores really (just Single Unit?)
-        # Let's show "Status" instead of Decision?
-        # Or keep structure but dashes for unused?
-        # Actually Single Image Backend doesn't return scores yet.
-        # Let's show generic "Analysis Complete" if no scores.
-        
         t_results = Table([
              [Paragraph(tr('status_label'), style_box_label)],
              [Paragraph(tr('complete'), StyleH1)]

@@ -717,8 +717,6 @@ def structural_difference_analysis(ref, sample):
     img1_color = cv2.cvtColor(gray1, cv2.COLOR_GRAY2BGR)
     diff_only = np.zeros_like(img1_color)
     diff_only[combined_filtered > 0] = [0, 0, 255] # Red BGR
-    # Optional: Composite over original? User said "Pure Differences only" and showed red on black in code
-    # Code: diff_only = np.zeros_like... diff_only[...] = Red. So background is black.
     
     # 9. Visualization Compilations
     # Subplot: Gradient, Combined, Noise Filtered
@@ -767,7 +765,6 @@ def structural_difference_analysis(ref, sample):
     changed_pixels = np.sum(combined_filtered > 0)
     change_percentage = (changed_pixels / total_pixels) * 100
     
-    # User Request: Score must be 100 - current value (Closer to 100 is better)
     similarity_score = max(0, 100 - change_percentage)
     
     if similarity_score >= 99.9:

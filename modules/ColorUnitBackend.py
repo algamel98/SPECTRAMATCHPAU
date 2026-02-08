@@ -23,24 +23,14 @@ WHITE_POINTS = {
 }
 
 def adapt_to_illuminant(xyz_d65, target_illuminant):
-    """
-    Simple Von Kries chromatic adaptation (Bradford matrix is better but Von Kries is standard for variation).
-    Here we use simple scaling (Von Kries) on XYZ directly or LMS. 
-    Ideally we convert to LMS, scale, then back to XYZ.
-    For this implementation, let's use a simplified Von Kries on XYZ to minimize dependencies.
-    """
+    """Chromatic adaptation from D65 to the target illuminant using the Bradford transform."""
     if target_illuminant not in WHITE_POINTS:
         return xyz_d65
         
     src_white = WHITE_POINTS['D65']
     dst_white = WHITE_POINTS[target_illuminant]
     
-    # Transformation matrix for Bradford adaptation (D65 -> D50 example usually uses this)
-    # But strictly, we need M_Bradford * XYZ -> RGB_LMS -> Scale -> XYZ'.
-    # Simplified approach: XYZ_new = XYZ_old * (White_new / White_old) (Wrong but simple)
-    # Better approach:
-    # 1. Convert to Cone Response (LMS)
-    # M_MA (Bradford)
+    # Bradford chromatic adaptation matrix
     M_A = np.array([
         [0.8951000, 0.2664000, -0.1614000],
         [-0.7502000, 1.7135000, 0.0367000],
@@ -807,8 +797,7 @@ def analyze_color(ref_img_bgr, sample_img_bgr, config=None):
             lx = gx - crop_off_x
             ly = gy - crop_off_y
             
-            # Ensure local point is within the cropped image
-            # (Should be guaranteed by logic, but safety first)
+            # Clamp to cropped image bounds
             lx = max(0, min(w - 1, lx))
             ly = max(0, min(h - 1, ly))
             
@@ -824,7 +813,7 @@ def analyze_color(ref_img_bgr, sample_img_bgr, config=None):
 
             reg_stats.append({
                 "id": i+1, 
-                "pos": (gx, gy), # Report GLOBAL coordinates as requested
+                "pos": (gx, gy),
                 "ref": r_stat, "sam": s_stat,
                 "de76": d76, "de94": d94, "de00": d00,
                 "status": status

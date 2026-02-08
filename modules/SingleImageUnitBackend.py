@@ -192,11 +192,7 @@ def analyze_and_generate(sample_img_bgr, settings, output_path, report_id=None, 
         lx = max(0, min(w - 1, lx))
         ly = max(0, min(h - 1, ly))
         
-        # Simple point sampling (1 pixel) or small area? 
-        # ColorUnit uses region_stats which takes an average over radius r.
-        # We should replicate that for consistency.
-        
-        # Local stats logic (simplified version of region_stats)
+        # Local area averaging (consistent with ColorUnit region_stats)
         cx, cy = int(lx), int(ly)
         rad = r_vis
         
@@ -204,7 +200,7 @@ def analyze_and_generate(sample_img_bgr, settings, output_path, report_id=None, 
         mask = (x_grid - cx)**2 + (y_grid - cy)**2 <= rad*rad
         
         if not np.any(mask):
-            # Fallback to single pixel if mask is empty (edge case)
+            # Fallback to single pixel
             bgr_val = img_bgr[ly, lx]
         else:
             bgr_in_circle = img_bgr[mask]

@@ -1217,24 +1217,15 @@ function updateShapePreview() {
         dimensions.textContent = width + ' × ' + height + ' px';
     }
 
-    // Check conflicts (Region Changed)
     checkRegionConflicts();
 }
 
 function checkRegionConflicts() {
     if (PointSelectorState.points.length === 0) return;
 
-    // If we have points, check if they are still inside the new region/settings
-    // We can reuse isPointWithinROI logic but we need to pass coordinates
-
     var conflictsFound = false;
     var pointsToReplace = [];
 
-    // Simulate a container for isPointWithinROI (we need logical bounds check)
-    // Actually isPointWithinROI relies on container dimensions, which is annoying here.
-    // Let's implement logic using normalized coordinates which we store
-
-    // Reuse RegionSelector state
     var useCrop = false;
     if (typeof RegionSelector !== 'undefined' && RegionSelector.isPlaced() && !AppState.processFullImage) {
         useCrop = true;
@@ -1806,14 +1797,7 @@ function executeSequentialSteps() {
             use_crop: true
         };
     } else if (!AppState.processFullImage) {
-        // Fallback: User wants partial analysis (Full Image OFF) but hasn't clicked/dragged a region.
-        // We assume they want the default centered shape as shown in the preview (implied).
-
-        // We need image dimensions to calculate center. 
-        // We can get them from the RegionSelector state (which tracks them) or the image elements directly.
-        // Let's rely on RegionSelector helper if available, or manual calculation.
-
-        // Use AppState.shapeType and AppState.shapeSize (or specific dimensions)
+        // Fallback: use default centered shape as shown in the preview
         var shape = AppState.shapeType || 'circle';
         var width = 100;
         var height = 100;
@@ -1840,8 +1824,7 @@ function executeSequentialSteps() {
             }
         }
 
-        // We need the NATURAL image dimensions to calculate the center crop coordinates
-        // Assuming Ref image is the basis (or test if single).
+        // Use natural image dimensions to calculate center crop coordinates
         var imgEl = AppState.analyzeSingleImage ? document.getElementById('testPreview') : document.getElementById('refPreview');
         if (imgEl && imgEl.naturalWidth) {
             var natW = imgEl.naturalWidth;
@@ -3077,9 +3060,6 @@ function initModal() {
         closeModal();
     });
 
-    // Note: Save and Reset use onclick in HTML, but we add listeners for safety
-    // These will complement the onclick handlers
-
     // Click outside modal to close
     if (overlay) {
         overlay.addEventListener('click', function (e) {
@@ -4142,9 +4122,6 @@ function confirmPoints() {
 }
 
 function updateManualPointsStatus() {
-    // We need to update BOTH single and color statuses potentially, or just the active one?
-    // The settings modal might show both tabs.
-
     // Update Color Status
     var statusEl = document.getElementById('manualPointsStatus'); // Defaults to color one
     var statusText = statusEl ? statusEl.querySelector('.status-text') : null;
@@ -4162,12 +4139,6 @@ function updateManualPointsStatus() {
         if (clearBtn) clearBtn.style.display = 'none';
     }
 
-    // Update Single Status (New IDs needed in HTML?)
-    // I haven't added status box to Single HTML yet. 
-    // Assuming identical IDs but with suffix if I added them?
-    // I didn't add the status box HTML in previous replace_file_content for Single mode.
-    // I only added the progress bar.
-    // That acts as the status display effectively.
 }
 
 function clearManualPoints() {

@@ -133,8 +133,7 @@ def crop_image(image, region_data):
             # Update Alpha channel
             cropped_bgra[:, :, 3] = cv2.bitwise_and(cropped_bgra[:, :, 3], mask)
             
-            # Optional: Visual cleanup (set RGB to 0 where Alpha is 0) to ensure immediate visual black if ignoring alpha
-            # But the requirement is strict separation. Let's force RGB to black where Alpha is 0 for safety.
+            # Zero out RGB where Alpha is 0
             b, g, r, a = cv2.split(cropped_bgra)
             b = cv2.bitwise_and(b, b, mask=mask)
             g = cv2.bitwise_and(g, g, mask=mask)
@@ -144,7 +143,6 @@ def crop_image(image, region_data):
         return cropped_bgra
     except Exception as e:
         print(f"Error cropping: {e}")
-        # Return empty/safe 4-channel image or original wrapped
         if image.shape[2] == 3:
             return cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
         return image
@@ -264,12 +262,7 @@ def analyze():
                 # Construct strict geometry for backend
                 # Note: region_data x,y is always top-left of the bounding box
                 if rtype == 'circle':
-                    # Circle defined by center and radius
-                    # x,y is top-left, so center is x + w/2
-                    # Use original (unclamped) or clamped? 
-                    # Logic: The region definition is abstract geometry on the original image.
-                    # We should use the parameters as intended by the user selection.
-                    # region-selector.js sends rounded integers.
+                    # Circle: center and radius from bounding box
                     cx = rx + rw // 2
                     cy = ry + rh // 2
                     r = min(rw, rh) // 2
@@ -387,7 +380,6 @@ def analyze():
             from modules.ReportUtils import numpy_to_rl, generate_unified_cover
             from pypdf import PdfReader
             
-            # We need small thumbnails
             rl_ref = numpy_to_rl(ref_img_proc, max_w=200, max_h=200)
             rl_sample = numpy_to_rl(sample_img_proc, max_w=200, max_h=200)
             

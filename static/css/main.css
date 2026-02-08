@@ -5267,7 +5267,6 @@ body {
 
 .dropdown-item:hover {
     background: #f8fafc;
-    /* Changed from f1f5f9 for subtle hover */
     color: #475569;
 }
 
