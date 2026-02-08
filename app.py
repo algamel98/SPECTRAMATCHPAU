@@ -161,21 +161,17 @@ def desktop_ui():
 def download_desktop_installer():
     """Serve the Windows desktop installer (.exe).
     
-    The installer file is expected at:
-      installer/output/SpectraMatch_Setup_2.2.1.exe
-    
-    If the file hasn't been built yet, returns a helpful 404 page.
-    For production, you can replace this with a redirect to an
-    external URL (GitHub Releases, CDN, etc.) by changing the
-    DESKTOP_INSTALLER_URL environment variable.
+    If the local build exists (installer/output/SpectraMatch_Setup_2.2.1.exe),
+    serves it directly. Otherwise, redirects to the GitHub Release download.
+    Override the redirect URL with the DESKTOP_INSTALLER_URL env var.
     """
-    # Option A: Redirect to external URL if configured
-    external_url = os.environ.get('DESKTOP_INSTALLER_URL')
-    if external_url:
-        from flask import redirect
-        return redirect(external_url)
+    # Option A: Redirect to external URL if configured (env var or GitHub Release)
+    external_url = os.environ.get(
+        'DESKTOP_INSTALLER_URL',
+        'https://github.com/algamel98/SPECTRAMATCHPAU/releases/download/v2.2.1/SpectraMatch_Setup_2.2.1.exe'
+    )
     
-    # Option B: Serve the file directly from the installer/output folder
+    # Option B: Serve the file directly if it exists locally
     installer_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'installer', 'output')
     installer_name = 'SpectraMatch_Setup_2.2.1.exe'
     installer_path = os.path.join(installer_dir, installer_name)
@@ -188,11 +184,8 @@ def download_desktop_installer():
             mimetype='application/octet-stream'
         )
     else:
-        return jsonify({
-            'error': 'Installer not yet available',
-            'message': 'The desktop installer has not been built yet. '
-                       'Run installer/build_installer.bat to generate it.'
-        }), 404
+        from flask import redirect
+        return redirect(external_url)
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze():
