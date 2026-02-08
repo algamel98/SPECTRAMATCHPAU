@@ -1358,6 +1358,7 @@ body {
 .size-slider-container {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 12px;
 }
 
@@ -1433,7 +1434,9 @@ body {
 }
 
 .size-slider-container input[type="range"] {
-    width: 150px;
+    flex: 1;
+    min-width: 100px;
+    max-width: 200px;
     height: 6px;
     border-radius: 3px;
     background: #e2e8f0;

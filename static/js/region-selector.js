@@ -76,7 +76,6 @@ var RegionSelector = (function () {
         // Initial state - not placed until user clicks
         hideSelection();
 
-        console.log('RegionSelector initialized');
     }
 
     /**
@@ -124,6 +123,7 @@ var RegionSelector = (function () {
         // Reference image events
         if (elements.refImage) {
             elements.refImage.addEventListener('click', handleImageClick);
+            elements.refImage.addEventListener('mousedown', handleImageMouseDown);
             elements.refImage.addEventListener('wheel', handleWheel, { passive: false });
             elements.refImage.style.cursor = 'crosshair';
         }
@@ -131,6 +131,7 @@ var RegionSelector = (function () {
         // Test image events
         if (elements.testImage) {
             elements.testImage.addEventListener('click', handleImageClick);
+            elements.testImage.addEventListener('mousedown', handleImageMouseDown);
             elements.testImage.addEventListener('wheel', handleWheel, { passive: false });
             elements.testImage.style.cursor = 'crosshair';
         }
@@ -244,20 +245,8 @@ var RegionSelector = (function () {
         var pixelX = Math.round(displayX * scaleX);
         var pixelY = Math.round(displayY * scaleY);
 
-        // ── Pen (freehand) mode ──
-        if (state.shape === 'pen') {
-            e.preventDefault(); e.stopPropagation();
-            pixelX = Math.max(0, Math.min(naturalWidth, pixelX));
-            pixelY = Math.max(0, Math.min(naturalHeight, pixelY));
-            state.penPoints = [{x: pixelX, y: pixelY}];
-            state.penDrawing = true;
-            state.penClosed = false;
-            state.penActivePanel = image.closest('.panel-content');
-            state.isPlaced = true;
-            showSelection();
-            _penRenderAll();
-            return;
-        }
+        // Pen mode is handled by mousedown, not click
+        if (state.shape === 'pen') return;
 
         // CRITICAL: Constrain center position within image bounds considering region size
         var dimensions = getCurrentDimensions();
@@ -278,15 +267,45 @@ var RegionSelector = (function () {
     }
 
     /**
+     * Handle mousedown on IMAGE — used for pen (freehand) drawing start
+     * This fires immediately on press, unlike click which fires on release
+     */
+    function handleImageMouseDown(e) {
+        if (!state.enabled) return;
+        if (state.shape !== 'pen') return;
+
+        var image = e.currentTarget;
+        if (!image || image.style.display === 'none') return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        var imgRect = image.getBoundingClientRect();
+        var naturalWidth = image.naturalWidth || imgRect.width;
+        var naturalHeight = image.naturalHeight || imgRect.height;
+
+        var scaleX = naturalWidth / imgRect.width;
+        var scaleY = naturalHeight / imgRect.height;
+
+        var pixelX = Math.round((e.clientX - imgRect.left) * scaleX);
+        var pixelY = Math.round((e.clientY - imgRect.top) * scaleY);
+        pixelX = Math.max(0, Math.min(naturalWidth, pixelX));
+        pixelY = Math.max(0, Math.min(naturalHeight, pixelY));
+
+        state.penPoints = [{x: pixelX, y: pixelY}];
+        state.penDrawing = true;
+        state.penClosed = false;
+        state.penActivePanel = image.closest('.panel-content');
+        state.isPlaced = true;
+        showSelection();
+        _penRenderAll();
+    }
+
+    /**
      * Handle mouse down on overlay for dragging
      */
     function handleOverlayMouseDown(e) {
-        console.log('Overlay mousedown triggered', e.currentTarget.id);
-        
-        if (!state.enabled || !state.isPlaced) {
-            console.log('Drag blocked: enabled=' + state.enabled + ', isPlaced=' + state.isPlaced);
-            return;
-        }
+        if (!state.enabled || !state.isPlaced) return;
 
         e.preventDefault();
         e.stopPropagation();
@@ -304,8 +323,6 @@ var RegionSelector = (function () {
 
         document.body.style.cursor = 'grabbing';
         overlay.classList.add('dragging');
-        
-        console.log('Drag started, isDragging=' + state.isDragging);
     }
 
     /**
@@ -1025,7 +1042,6 @@ var RegionSelector = (function () {
             state.penPoints.push({x: first.x, y: first.y});
             state.penClosed = true;
             _penRenderAll();
-            console.log('Pen: freehand region closed');
         } else {
             state.penClosed = false;
             _penRenderAll();

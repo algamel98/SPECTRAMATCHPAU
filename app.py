@@ -165,18 +165,22 @@ def download_desktop_installer():
     serves it directly. Otherwise, redirects to the GitHub Release download.
     Override the redirect URL with the DESKTOP_INSTALLER_URL env var.
     """
-    # Option A: Redirect to external URL if configured (env var or GitHub Release)
-    external_url = os.environ.get(
+    from flask import redirect
+    
+    # Primary: redirect to GitHub Release (always up-to-date)
+    release_url = os.environ.get(
         'DESKTOP_INSTALLER_URL',
         'https://github.com/algamel98/SPECTRAMATCHPAU/releases/download/v2.2.1/SpectraMatch_Setup_2.2.1.exe'
     )
     
-    # Option B: Serve the file directly if it exists locally
+    # Fallback: serve local file if GitHub is unreachable
     installer_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'installer', 'output')
     installer_name = 'SpectraMatch_Setup_2.2.1.exe'
     installer_path = os.path.join(installer_dir, installer_name)
     
-    if os.path.exists(installer_path):
+    if release_url:
+        return redirect(release_url)
+    elif os.path.exists(installer_path):
         return send_file(
             installer_path,
             as_attachment=True,
@@ -184,8 +188,10 @@ def download_desktop_installer():
             mimetype='application/octet-stream'
         )
     else:
-        from flask import redirect
-        return redirect(external_url)
+        return jsonify({
+            'error': 'Installer not available',
+            'message': 'No installer URL configured and no local build found.'
+        }), 404
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze():

@@ -523,7 +523,7 @@ function initShapeDropdown() {
             
             if (radio) {
                 radio.checked = true;
-                radio.dispatchEvent(new Event('change'));
+                radio.dispatchEvent(new Event('change', { bubbles: true }));
             }
 
             // Update dropdown button
