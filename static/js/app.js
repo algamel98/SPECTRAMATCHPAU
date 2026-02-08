@@ -4719,6 +4719,64 @@ function initHelpAndFeedbackHandlers() {
 }
 
 // ==========================================
+// Download Fallback Dialog
+// ==========================================
+var _dlFallbackTimer = null;
+
+function showDownloadFallback(e) {
+    // Let the default link navigate (starts the real download)
+    // Then show the fallback dialog after a short delay
+    var overlay = document.getElementById('dlFallbackOverlay');
+    if (!overlay) return;
+
+    // Reset state
+    var TOTAL = 20;
+    var remaining = TOTAL;
+    var circumference = 2 * Math.PI * 36; // r=36
+    var ring = document.getElementById('dlRingFg');
+    var label = document.getElementById('dlFallbackSeconds');
+
+    if (ring) {
+        ring.style.transition = 'none';
+        ring.setAttribute('stroke-dashoffset', '0');
+    }
+    if (label) label.textContent = remaining;
+
+    // Show dialog after 500ms so the browser can start the download
+    setTimeout(function () {
+        overlay.style.display = 'flex';
+        // Apply i18n if available
+        if (typeof applyTranslations === 'function') applyTranslations();
+
+        // Start countdown
+        if (ring) {
+            ring.style.transition = 'stroke-dashoffset 1s linear';
+        }
+
+        _dlFallbackTimer = setInterval(function () {
+            remaining--;
+            if (label) label.textContent = Math.max(remaining, 0);
+            if (ring) {
+                var offset = circumference * ((TOTAL - remaining) / TOTAL);
+                ring.setAttribute('stroke-dashoffset', offset.toString());
+            }
+            if (remaining <= 0) {
+                closeDlFallback();
+            }
+        }, 1000);
+    }, 500);
+}
+
+function closeDlFallback() {
+    if (_dlFallbackTimer) {
+        clearInterval(_dlFallbackTimer);
+        _dlFallbackTimer = null;
+    }
+    var overlay = document.getElementById('dlFallbackOverlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+// ==========================================
 // Contact Popup
 // ==========================================
 function initContactPopup() {

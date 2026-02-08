@@ -23,6 +23,11 @@ var I18n = {
             'datasheet.modal.available': 'Available in English and Turkish',
             'download.pdf': 'Download PDF',
 
+            // Download Fallback Dialog
+            'dl.fallback.title': 'Your download should start automatically',
+            'dl.fallback.hint': 'If the download didn\'t start, click the button below',
+            'dl.fallback.btn': 'Download Now',
+
             // Sample Tests
             'samples': 'Samples',
             'sample.tests': 'Sample Tests',
@@ -631,6 +636,11 @@ var I18n = {
             'datasheet.modal.description': 'Eksiksiz teknik dokümantasyon PDF formatında mevcuttur. Sistem mimarisi, analiz metodolojisi, matematiksel temeller ve rapor yorumlama kılavuzları hakkında ayrıntılı bilgilere erişmek için veri sayfasını indirin.',
             'datasheet.modal.available': 'İngilizce ve Türkçe olarak mevcuttur',
             'download.pdf': 'PDF İndir',
+
+            // Download Fallback Dialog
+            'dl.fallback.title': 'İndirme işleminiz otomatik olarak başlamalıdır',
+            'dl.fallback.hint': 'İndirme başlamadıysa aşağıdaki butona tıklayın',
+            'dl.fallback.btn': 'Şimdi İndir',
 
             // Sample Tests
             'samples': 'Örnekler',

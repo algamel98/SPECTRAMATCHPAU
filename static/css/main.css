@@ -6199,3 +6199,159 @@ body {
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
+
+/* ==========================================
+   Download Fallback Dialog
+   ========================================== */
+.dl-fallback-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: dlFadeIn 0.25s ease;
+}
+
+@keyframes dlFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.dl-fallback-dialog {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 36px 40px 32px;
+    max-width: 380px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 102, 204, 0.08);
+    animation: dlSlideUp 0.3s ease;
+}
+
+@keyframes dlSlideUp {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.dl-fallback-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: #94a3b8;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.dl-fallback-close:hover {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.dl-fallback-icon {
+    color: #0066cc;
+    margin-bottom: 12px;
+    animation: dlBounce 2s ease-in-out infinite;
+}
+
+@keyframes dlBounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-4px); }
+}
+
+.dl-fallback-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.dl-fallback-timer-ring {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 18px;
+}
+
+.dl-fallback-ring {
+    width: 80px;
+    height: 80px;
+}
+
+.dl-ring-bg {
+    stroke: #e2e8f0;
+}
+
+.dl-ring-fg {
+    stroke: #0066cc;
+    transition: stroke-dashoffset 1s linear;
+}
+
+.dl-fallback-seconds {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #0066cc;
+    font-variant-numeric: tabular-nums;
+}
+
+.dl-fallback-hint {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.dl-fallback-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #0066cc 0%, #0088ee 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+}
+
+.dl-fallback-btn:hover {
+    background: linear-gradient(135deg, #0055b3 0%, #0077dd 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 102, 204, 0.4);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.dl-fallback-btn:active {
+    transform: translateY(0);
+}
+
+.dl-fallback-version {
+    margin-top: 16px;
+    font-size: 11px;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+}
