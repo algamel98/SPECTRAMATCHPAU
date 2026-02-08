@@ -964,16 +964,16 @@
 
                                 <!-- Rectangle: Width and Height -->
                                 <div class="modal-dimension-group" id="modalRectangleDimension" style="display: none;">
-                                    <div style="display: flex; gap: 12px; align-items: center;">
+                                    <div style="display: flex; gap: 12px; align-items: flex-end;">
                                         <div style="flex: 1;">
                                             <label class="dimension-label">Width (px)</label>
                                             <input type="number" id="modalRectangleWidth" class="dimension-input"
-                                                min="10" max="500" value="150" step="1">
+                                                min="10" max="500" value="150" step="1" style="max-width: none; width: 100%;">
                                         </div>
                                         <div style="flex: 1;">
                                             <label class="dimension-label">Height (px)</label>
                                             <input type="number" id="modalRectangleHeight" class="dimension-input"
-                                                min="10" max="500" value="100" step="1">
+                                                min="10" max="500" value="100" step="1" style="max-width: none; width: 100%;">
                                         </div>
                                     </div>
                                 </div>
@@ -1329,8 +1329,8 @@
                                 <label data-i18n="primary.illuminant">Primary Illuminant</label>
                                 <small data-i18n="used.standard.calc">Used for standard calculations</small>
                             </div>
-                            <div style="width: 200px;">
-                                <select id="primary_illuminant" class="form-select">
+                            <div style="width: 220px; flex-shrink: 0;">
+                                <select id="primary_illuminant" class="form-select" style="width: 100%;">
                                     <option value="D65" selected>D65 (Daylight 6500K)</option>
                                     <option value="D50">D50 (Daylight 5000K)</option>
                                     <option value="TL84">TL84 (Store Light 4000K)</option>
