@@ -1273,6 +1273,34 @@ function updateUI(){
     var regionActive=!State.fullImage;
     $('refCanvas').classList.toggle('region-active',regionActive&&hasRef);
     $('sampleCanvas').classList.toggle('region-active',regionActive&&hasSample);
+    updateReportSectionsForMode();
+}
+
+/* ═══ Disable report sections not available in Single Image mode ═══ */
+var _savedDualChecks={};
+function updateReportSectionsForMode(){
+    /* Color sections NOT in Single Image report (require two images) */
+    var colorOnlyIds=['rptColorSpaces','rptDiffMetrics','rptStats','rptVisualDiff'];
+    /* All Pattern sections NOT in Single Image report */
+    var patternIds=['rptEnableSsim','rptEnableGradient','rptEnablePhase','rptEnableStructural',
+        'rptEnableFourier','rptEnableGlcm','rptGradBound','rptPhaseBound','rptSummary','rptConclusion','rptPatternRec'];
+    var ids=colorOnlyIds.concat(patternIds);
+    var isSingle=State.singleMode;
+    ids.forEach(function(id){
+        var el=$(id);
+        if(!el)return;
+        if(isSingle){
+            if(!(id in _savedDualChecks)) _savedDualChecks[id]=el.checked;
+            el.checked=false;
+            el.disabled=true;
+        }else{
+            el.disabled=false;
+            if(id in _savedDualChecks){el.checked=_savedDualChecks[id];delete _savedDualChecks[id];}
+            else el.checked=true;
+        }
+        var lbl=el.closest('label');
+        if(lbl) lbl.classList.toggle('disabled',isSingle);
+    });
 }
 
 /* ═══ Settings Collection ═══ */

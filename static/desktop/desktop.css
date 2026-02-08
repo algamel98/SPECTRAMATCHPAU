@@ -827,6 +827,13 @@ input, select, textarea, button { font-family: inherit; font-size: inherit; }
     cursor: pointer;
 }
 
+.prop-check-grid label.disabled,
+.prop-check-list label.disabled {
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
+}
+
 .prop-check-list {
     display: flex;
     flex-direction: column;
