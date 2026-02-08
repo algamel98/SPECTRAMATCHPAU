@@ -296,9 +296,10 @@ function log(msg,cls){
 /* ═══ Init ═══ */
 document.addEventListener('DOMContentLoaded',function(){
     State.lang=localStorage.getItem('desk_lang')||'en';
-    State.theme=localStorage.getItem('desk_theme')||'dark';
+    State.theme=localStorage.getItem('desk_theme')||'light';
     document.body.setAttribute('data-theme',State.theme);
     $('langCode').textContent=State.lang.toUpperCase();
+    updateLangFlag();
     translatePage();
     log(t('log.init'),'info');
     log(t('sb.ready'),'');
@@ -328,10 +329,18 @@ function initTheme(){
 }
 
 /* ═══ Language ═══ */
+function updateLangFlag(){
+    var flag=$('langFlag');
+    if(flag){
+        flag.src=State.lang==='tr'?'/static/images/tr.svg':'/static/images/uk.svg';
+        flag.alt=State.lang.toUpperCase();
+    }
+}
 function initLang(){
     $('langSwitch').addEventListener('click',function(){
         State.lang=State.lang==='en'?'tr':'en';
         $('langCode').textContent=State.lang.toUpperCase();
+        updateLangFlag();
         localStorage.setItem('desk_lang',State.lang);
         translatePage();updateUI();
         log(t('log.language')+': '+(State.lang==='en'?'English':'Türkçe'),'info');
@@ -2046,6 +2055,7 @@ function restoreState(){
         if(s.theme){State.theme=s.theme;localStorage.setItem('desk_theme',s.theme);}
         document.body.setAttribute('data-theme',State.theme);
         $('langCode').textContent=State.lang.toUpperCase();
+        updateLangFlag();
 
         /* Mode */
         State.singleMode=!!s.singleMode;

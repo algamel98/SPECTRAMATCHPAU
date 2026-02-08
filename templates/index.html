@@ -485,10 +485,18 @@
                         </div>
                     </div>
                     
-                    <!-- Size Slider -->
-                    <label data-i18n="size.px">Size (px):</label>
-                    <input type="range" id="shapeSize" min="20" max="500" value="100">
-                    <span class="size-value" id="sizeValue">100 <span data-i18n="px">px</span></span>
+                    <!-- Size Slider (Width) -->
+                    <div class="inline-size-group" id="inlineWidthGroup">
+                        <label id="shapeSizeLabel" data-i18n="size.px">Size (px):</label>
+                        <input type="range" id="shapeSize" min="20" max="500" value="100">
+                        <span class="size-value" id="sizeValue">100 <span data-i18n="px">px</span></span>
+                    </div>
+                    <!-- Height Slider (Rectangle only) -->
+                    <div class="inline-size-group" id="inlineHeightGroup" style="display:none;">
+                        <label data-i18n="height.px">Height (px):</label>
+                        <input type="range" id="shapeHeight" min="20" max="500" value="100">
+                        <span class="size-value" id="heightValue">100 <span data-i18n="px">px</span></span>
+                    </div>
                     <span class="hint-icon" id="regionHintIcon" tabindex="0">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
                             stroke-width="2" style="overflow: visible;">

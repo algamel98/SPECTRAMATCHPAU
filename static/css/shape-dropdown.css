@@ -153,6 +153,7 @@
 .size-slider-container {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 12px;
     padding: 12px 20px;
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -170,4 +171,25 @@
 .size-slider-container input[type="range"] {
     flex: 1;
     min-width: 150px;
+}
+
+/* Inline size groups (width / height sliders) */
+.inline-size-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.inline-size-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569;
+    white-space: nowrap;
+}
+
+.inline-size-group input[type="range"] {
+    flex: 1;
+    min-width: 100px;
 }

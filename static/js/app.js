@@ -393,6 +393,8 @@ function initShapeControls() {
             updateShapeOptions();
             // Pen mode: disable/dim size controls
             _togglePenSizeControls(e.target.value === 'pen');
+            // Show/hide inline height slider for rectangle
+            _toggleInlineHeightGroup(e.target.value);
             // Sync with RegionSelector
             if (typeof RegionSelector !== 'undefined') {
                 RegionSelector.setShape(e.target.value);
@@ -440,13 +442,36 @@ function initShapeControls() {
             // Re-translate px text
             var pxSpan = sizeValue.querySelector('span[data-i18n="px"]');
             if (pxSpan) pxSpan.textContent = I18n.t('px');
-            // Sync with RegionSelector
-            if (typeof RegionSelector !== 'undefined') {
+            // For rectangle, update width via RegionSelector
+            if (AppState.shapeType === 'rectangle' && typeof RegionSelector !== 'undefined') {
+                var curH = (RegionSelector.getState && RegionSelector.getState().rectangleHeight) || AppState.rectangleHeight || 100;
+                AppState.rectangleWidth = AppState.shapeSize;
+                RegionSelector.setRectangleDimensions(AppState.shapeSize, curH);
+            } else if (typeof RegionSelector !== 'undefined') {
                 RegionSelector.setSize(AppState.shapeSize);
             }
             // Sync with modal
             syncMainPageToModal();
             // Update shape preview
+            updateShapePreview();
+        });
+    }
+
+    // Height slider (for rectangle)
+    var heightSlider = document.getElementById('shapeHeight');
+    var heightValue = document.getElementById('heightValue');
+    if (heightSlider && heightValue) {
+        heightSlider.addEventListener('input', function (e) {
+            var h = parseInt(e.target.value);
+            AppState.rectangleHeight = h;
+            heightValue.innerHTML = h + ' <span data-i18n="px">px</span>';
+            var pxSpan = heightValue.querySelector('span[data-i18n="px"]');
+            if (pxSpan) pxSpan.textContent = I18n.t('px');
+            if (typeof RegionSelector !== 'undefined') {
+                var curW = (RegionSelector.getState && RegionSelector.getState().rectangleWidth) || AppState.rectangleWidth || AppState.shapeSize || 150;
+                RegionSelector.setRectangleDimensions(curW, h);
+            }
+            syncMainPageToModal();
             updateShapePreview();
         });
     }
@@ -614,13 +639,46 @@ function toggleShapeControls(enabled) {
 function _togglePenSizeControls(isPen) {
     var sizeSlider = document.getElementById('shapeSize');
     var sizeValue = document.getElementById('sizeValue');
-    var sizeLabel = document.querySelector('label[data-i18n="size.px"]');
+    var sizeLabel = document.getElementById('shapeSizeLabel');
     var hintIcon = document.getElementById('regionHintIcon');
+    var heightSlider = document.getElementById('shapeHeight');
+    var heightValue = document.getElementById('heightValue');
+    var heightGroup = document.getElementById('inlineHeightGroup');
 
     if (sizeSlider) { sizeSlider.disabled = isPen; sizeSlider.style.opacity = isPen ? '0.35' : ''; sizeSlider.style.pointerEvents = isPen ? 'none' : ''; }
     if (sizeValue) { sizeValue.style.opacity = isPen ? '0.35' : ''; }
     if (sizeLabel) { sizeLabel.style.opacity = isPen ? '0.35' : ''; }
     if (hintIcon) { hintIcon.style.opacity = isPen ? '0.35' : ''; hintIcon.style.pointerEvents = isPen ? 'none' : ''; }
+    if (heightSlider) { heightSlider.disabled = isPen; heightSlider.style.opacity = isPen ? '0.35' : ''; heightSlider.style.pointerEvents = isPen ? 'none' : ''; }
+    if (heightValue) { heightValue.style.opacity = isPen ? '0.35' : ''; }
+    if (isPen && heightGroup) { heightGroup.style.display = 'none'; }
+}
+
+/* Show/hide inline height group and update label based on shape */
+function _toggleInlineHeightGroup(shape) {
+    var heightGroup = document.getElementById('inlineHeightGroup');
+    var sizeLabel = document.getElementById('shapeSizeLabel');
+    var isRect = shape === 'rectangle';
+
+    if (heightGroup) heightGroup.style.display = isRect ? '' : 'none';
+    if (sizeLabel) {
+        sizeLabel.setAttribute('data-i18n', isRect ? 'width.px' : 'size.px');
+        sizeLabel.textContent = I18n.t(isRect ? 'width.px' : 'size.px');
+    }
+
+    // Sync height slider value from RegionSelector state
+    if (isRect) {
+        var heightSlider = document.getElementById('shapeHeight');
+        var heightValue = document.getElementById('heightValue');
+        var h = 100;
+        if (typeof RegionSelector !== 'undefined' && RegionSelector.getState) {
+            h = RegionSelector.getState().rectangleHeight || 100;
+        } else if (AppState.rectangleHeight) {
+            h = AppState.rectangleHeight;
+        }
+        if (heightSlider) heightSlider.value = h;
+        if (heightValue) heightValue.innerHTML = h + ' <span data-i18n="px">' + I18n.t('px') + '</span>';
+    }
 }
 
 // ==========================================
@@ -1045,6 +1103,7 @@ function syncInlineShapeControls(shape) {
         inlineRadio.checked = true;
         updateShapeOptions();
     }
+    _toggleInlineHeightGroup(shape);
 }
 
 function syncSizeSlider(value) {

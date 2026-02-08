@@ -2150,6 +2150,7 @@ select option {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 5px;
     padding: 2px 8px;
     cursor: pointer;
     border-radius: 3px;
@@ -2158,6 +2159,19 @@ select option {
 }
 
 .lang-switch:hover { background: rgba(255,255,255,0.08); }
+
+.lang-flag {
+    width: 20px;
+    height: 14px;
+    border-radius: 2px;
+    object-fit: cover;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.15);
+    transition: transform 0.15s;
+}
+
+.lang-switch:hover .lang-flag { transform: scale(1.1); }
+
+[data-theme="light"] .lang-flag { box-shadow: 0 0 0 1px rgba(0,0,0,0.12); }
 
 .lang-code {
     font-size: 11px;
