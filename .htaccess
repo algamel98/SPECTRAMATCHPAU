@@ -19,8 +19,11 @@ Options -MultiViews
     Require all denied
 </FilesMatch>
 
-# --- Deny access to Python source files ---
-<FilesMatch "\.(py|pyc|pyo)$">
+# --- Deny access to compiled Python bytecode (not needed by WSGI) ---
+# NOTE: Do NOT deny .py files here — WSGIScriptAlias needs Apache to
+# access wsgi.py internally.  Apache will not serve .py as static files
+# when WSGIScriptAlias / is active.
+<FilesMatch "\.(pyc|pyo)$">
     Require all denied
 </FilesMatch>
 
