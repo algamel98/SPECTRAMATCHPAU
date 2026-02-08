@@ -89,7 +89,7 @@ def make_draw_header_footer(report_lang='en'):
 
 def generate_receipt(pdf_path, settings, processed_images, report_id, operator_name, date_str, time_str, 
                      color_score=0, pattern_score=0, overall_score=0, decision="PENDING",
-                     color_points=None, pattern_points=None, software_version="2.2.2", mode="dual"):
+                     color_points=None, pattern_points=None, software_version="2.2.3", mode="dual"):
     doc = SimpleDocTemplate(pdf_path, pagesize=A4, 
                             leftMargin=MARGIN_H, rightMargin=MARGIN_H, 
                             topMargin=MARGIN_V, bottomMargin=MARGIN_V)

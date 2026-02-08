@@ -161,37 +161,32 @@ def desktop_ui():
 def download_desktop_installer():
     """Serve the Windows desktop installer (.exe).
     
-    If the local build exists (installer/output/SpectraMatch_Setup_2.2.2.exe),
-    serves it directly. Otherwise, redirects to the GitHub Release download.
-    Override the redirect URL with the DESKTOP_INSTALLER_URL env var.
+    Priority order:
+      1. Local build  (installer/output/SpectraMatch_Setup_2.2.3.exe)
+      2. DESKTOP_INSTALLER_URL env-var override (if set)
+      3. Default GitHub Release redirect
     """
     from flask import redirect
     
-    # Primary: redirect to GitHub Release (always up-to-date)
-    release_url = os.environ.get(
-        'DESKTOP_INSTALLER_URL',
-        'https://github.com/algamel98/SPECTRAMATCHPAU/releases/download/v2.2.2/SpectraMatch_Setup_2.2.2.exe'
-    )
-    
-    # Fallback: serve local file if GitHub is unreachable
     installer_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'installer', 'output')
-    installer_name = 'SpectraMatch_Setup_2.2.2.exe'
+    installer_name = 'SpectraMatch_Setup_2.2.3.exe'
     installer_path = os.path.join(installer_dir, installer_name)
     
-    if release_url:
-        return redirect(release_url)
-    elif os.path.exists(installer_path):
+    # 1. Serve local file if it exists (always freshest build)
+    if os.path.exists(installer_path):
         return send_file(
             installer_path,
             as_attachment=True,
             download_name=installer_name,
             mimetype='application/octet-stream'
         )
-    else:
-        return jsonify({
-            'error': 'Installer not available',
-            'message': 'No installer URL configured and no local build found.'
-        }), 404
+    
+    # 2. Redirect to env-var URL or default GitHub Release
+    release_url = os.environ.get(
+        'DESKTOP_INSTALLER_URL',
+        'https://github.com/algamel98/SPECTRAMATCHPAU/releases/download/v2.2.3/SpectraMatch_Setup_2.2.3.exe'
+    )
+    return redirect(release_url)
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze():
@@ -345,7 +340,7 @@ def analyze():
             SettingsReceipt.generate_receipt(
                 receipt_pdf, settings, processed_imgs_for_receipt,
                 analysis_id, op_name, date_str, time_str,
-                mode="single", software_version="2.2.2"
+                mode="single", software_version="2.2.3"
             )
             
             # Return JSON response with download URLs (consistent with two-image mode)
@@ -496,7 +491,7 @@ def analyze():
                 pattern_score=pattern_score,
                 overall_score=overall_score,
                 decision=decision,
-                software_version="2.2.2" 
+                software_version="2.2.3" 
             )
                 
             print(f"Analysis Complete: Color={color_score:.1f}, Pattern={pattern_score:.1f}, Decision={decision}")

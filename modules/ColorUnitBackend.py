@@ -104,7 +104,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 # CONFIGURATION CONSTANTS
 # =================================================================================================
 
-SOFTWARE_VERSION = "2.2.2"
+SOFTWARE_VERSION = "2.2.3"
 COMPANY_NAME = "Textile Engineering Solutions"
 COMPANY_SUBTITLE = "Professional Color Analysis Solutions"
 REPORT_TITLE = "Color Analysis Report"

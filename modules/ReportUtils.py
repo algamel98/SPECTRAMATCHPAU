@@ -16,7 +16,7 @@ from reportlab.lib.enums import TA_LEFT, TA_CENTER
 # SHARED CONSTANTS
 # =================================================================================================
 
-SOFTWARE_VERSION = "2.2.2"
+SOFTWARE_VERSION = "2.2.3"
 COMPANY_NAME = "Textile Engineering Solutions"
 COMPANY_SUBTITLE = "Professional Quality Control Solutions" # Slightly generic to fit both
 PAGE_SIZE = A4
