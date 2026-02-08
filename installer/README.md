@@ -51,7 +51,7 @@ This script automatically:
 
 ### Output
 ```
-installer\output\SpectraMatch_Setup_2.2.1.exe
+installer\output\SpectraMatch_Setup_2.2.2.exe
 ```
 
 This single `.exe` file is your complete installer — ready to distribute.
@@ -71,7 +71,7 @@ Upload the `.exe` to one of:
 
 Then set the environment variable:
 ```bash
-DESKTOP_INSTALLER_URL=https://github.com/yourname/spectramatch/releases/download/v2.2.1/SpectraMatch_Setup_2.2.1.exe
+DESKTOP_INSTALLER_URL=https://github.com/yourname/spectramatch/releases/download/v2.2.2/SpectraMatch_Setup_2.2.2.exe
 ```
 
 The Flask route will automatically redirect to this URL instead of serving the local file.

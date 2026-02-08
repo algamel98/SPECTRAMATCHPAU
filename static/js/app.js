@@ -1,6 +1,6 @@
 /**
  * Textile QC System - Main Application
- * Version 2.2.1 - With Progress Tracking
+ * Version 2.2.2 - With Progress Tracking
  */
 
 // ==========================================

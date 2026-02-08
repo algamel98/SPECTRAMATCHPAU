@@ -15,7 +15,7 @@
 ; ============================================================
 
 #define MyAppName "SpectraMatch"
-#define MyAppVersion "2.2.1"
+#define MyAppVersion "2.2.2"
 #define MyAppPublisher "SpectraMatch"
 #define MyAppURL "https://spectramatch.com"
 #define MyAppExeName "SpectraMatch.exe"
@@ -64,11 +64,13 @@ Name: "startmenuicon"; Description: "Create a Start Menu shortcut"; GroupDescrip
 [Files]
 ; Include the entire PyInstaller output folder
 Source: "..\dist\SpectraMatch\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; High-quality icon file for shortcuts (avoids pixelation from EXE-embedded icon)
+Source: "spectramatch.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppExeName}"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\spectramatch.ico"
 Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\{#MyAppExeName}"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\spectramatch.ico"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

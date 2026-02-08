@@ -161,7 +161,7 @@ def desktop_ui():
 def download_desktop_installer():
     """Serve the Windows desktop installer (.exe).
     
-    If the local build exists (installer/output/SpectraMatch_Setup_2.2.1.exe),
+    If the local build exists (installer/output/SpectraMatch_Setup_2.2.2.exe),
     serves it directly. Otherwise, redirects to the GitHub Release download.
     Override the redirect URL with the DESKTOP_INSTALLER_URL env var.
     """
@@ -170,12 +170,12 @@ def download_desktop_installer():
     # Primary: redirect to GitHub Release (always up-to-date)
     release_url = os.environ.get(
         'DESKTOP_INSTALLER_URL',
-        'https://github.com/algamel98/SPECTRAMATCHPAU/releases/download/v2.2.1/SpectraMatch_Setup_2.2.1.exe'
+        'https://github.com/algamel98/SPECTRAMATCHPAU/releases/download/v2.2.2/SpectraMatch_Setup_2.2.2.exe'
     )
     
     # Fallback: serve local file if GitHub is unreachable
     installer_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'installer', 'output')
-    installer_name = 'SpectraMatch_Setup_2.2.1.exe'
+    installer_name = 'SpectraMatch_Setup_2.2.2.exe'
     installer_path = os.path.join(installer_dir, installer_name)
     
     if release_url:
@@ -345,7 +345,7 @@ def analyze():
             SettingsReceipt.generate_receipt(
                 receipt_pdf, settings, processed_imgs_for_receipt,
                 analysis_id, op_name, date_str, time_str,
-                mode="single", software_version="2.2.1"
+                mode="single", software_version="2.2.2"
             )
             
             # Return JSON response with download URLs (consistent with two-image mode)
@@ -496,7 +496,7 @@ def analyze():
                 pattern_score=pattern_score,
                 overall_score=overall_score,
                 decision=decision,
-                software_version="2.2.1" 
+                software_version="2.2.2" 
             )
                 
             print(f"Analysis Complete: Color={color_score:.1f}, Pattern={pattern_score:.1f}, Decision={decision}")

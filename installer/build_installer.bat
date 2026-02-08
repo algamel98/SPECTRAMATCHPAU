@@ -87,7 +87,7 @@ echo  ================================================================
 echo       BUILD COMPLETE!
 echo  ================================================================
 echo.
-echo  Installer:  installer\output\SpectraMatch_Setup_2.2.1.exe
+echo  Installer:  installer\output\SpectraMatch_Setup_2.2.2.exe
 echo.
 echo  You can now:
 echo    1. Test the installer locally
