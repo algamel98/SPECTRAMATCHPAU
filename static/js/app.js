@@ -1470,16 +1470,6 @@ function initButtons() {
         });
     }
 
-    // Datasheet dropdown
-    var btnDatasheetDownload = document.getElementById('btnDatasheetDownload');
-    if (btnDatasheetDownload) {
-        btnDatasheetDownload.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var menu = document.getElementById('datasheetDropdown');
-            if (menu) menu.classList.toggle('show');
-        });
-    }
-
     // Datasheet download items - direct download on click
     var datasheetItems = document.querySelectorAll('.datasheet-dropdown .dropdown-item[data-type]');
     datasheetItems.forEach(function(item) {
@@ -1526,9 +1516,10 @@ function initButtons() {
 
         var datasheetMenu = document.getElementById('datasheetDropdown');
         var datasheetToggle = document.getElementById('btnDatasheetDownload');
-        if (datasheetMenu && datasheetMenu.classList.contains('show')) {
+        if (datasheetMenu && (datasheetMenu.classList.contains('show') || datasheetMenu.classList.contains('active'))) {
             if (!datasheetMenu.contains(e.target) && e.target !== datasheetToggle && !datasheetToggle.contains(e.target)) {
                 datasheetMenu.classList.remove('show');
+                datasheetMenu.classList.remove('active');
             }
         }
     });
@@ -3022,7 +3013,7 @@ function downloadSettings() {
 // Datasheet Functions
 // ==========================================
 function downloadDatasheet(type) {
-    var filename = type === 'en' ? 'Datasheet EN.pdf' : 'Datasheet TR.pdf';
+    var filename = type === 'en' ? 'Datasheet_EN.pdf' : 'Datasheet_TR.pdf';
     var url = '/static/DataSheets/' + filename;
     
     var a = document.createElement('a');
@@ -3034,7 +3025,7 @@ function downloadDatasheet(type) {
     
     // Close dropdown
     var menu = document.getElementById('datasheetDropdown');
-    if (menu) menu.classList.remove('show');
+    if (menu) { menu.classList.remove('show'); menu.classList.remove('active'); }
 }
 
 function openDatasheetModal(datasheetType) {
@@ -3048,7 +3039,7 @@ function openDatasheetModal(datasheetType) {
     
     // Close dropdown
     var menu = document.getElementById('datasheetDropdown');
-    if (menu) menu.classList.remove('show');
+    if (menu) { menu.classList.remove('show'); menu.classList.remove('active'); }
 }
 
 function closeDatasheetModal() {
@@ -4475,6 +4466,9 @@ function initDatasheetDownload() {
 
     btn.addEventListener('click', function (e) {
         e.stopPropagation();
+        // Mutual exclusion: close RTT dropdown when Datasheet opens
+        var rttDropdown = document.getElementById('rttDropdown');
+        if (rttDropdown) rttDropdown.classList.remove('active');
         dropdown.classList.toggle('active');
     });
 
@@ -4497,6 +4491,29 @@ function initDatasheetDownload() {
 // ==========================================
 // Ready-to-Test Images
 // ==========================================
+function _showRttLoader() {
+    var overlay = document.getElementById('rttLoaderOverlay');
+    if (overlay) overlay.classList.add('active');
+}
+
+function _hideRttLoader() {
+    var overlay = document.getElementById('rttLoaderOverlay');
+    if (overlay) overlay.classList.remove('active');
+}
+
+function _waitForPreviewLoad(prefix, cb) {
+    var preview = document.getElementById(prefix + 'Preview');
+    if (!preview) { cb(); return; }
+    if (preview.complete && preview.naturalWidth > 0 && preview.src && preview.style.display !== 'none') {
+        cb(); return;
+    }
+    var done = false;
+    function finish() { if (!done) { done = true; cb(); } }
+    preview.addEventListener('load', finish, { once: true });
+    preview.addEventListener('error', finish, { once: true });
+    setTimeout(finish, 8000);
+}
+
 function initReadyToTest() {
     var btn = document.getElementById('btnReadyToTest');
     var dropdown = document.getElementById('rttDropdown');
@@ -4504,6 +4521,9 @@ function initReadyToTest() {
 
     btn.addEventListener('click', function (e) {
         e.stopPropagation();
+        // Mutual exclusion: close Datasheet dropdown when RTT opens
+        var dsDropdown = document.getElementById('datasheetDropdown');
+        if (dsDropdown) dsDropdown.classList.remove('active');
         dropdown.classList.toggle('active');
     });
 
@@ -4532,11 +4552,17 @@ function initReadyToTest() {
                     singleToggle.checked = false;
                     singleToggle.dispatchEvent(new Event('change'));
                 }
+                _showRttLoader();
                 _fetchReadyImage(refName, function (file) {
                     handleFileUpload(file, 'reference');
                     _fetchReadyImage(sampleName, function (file2) {
                         handleFileUpload(file2, 'sample');
-                        console.log('RTT: pair loaded');
+                        _waitForPreviewLoad('ref', function () {
+                            _waitForPreviewLoad('test', function () {
+                                _hideRttLoader();
+                                console.log('RTT: pair loaded');
+                            });
+                        });
                     });
                 });
             } else if (singleName) {
@@ -4546,9 +4572,13 @@ function initReadyToTest() {
                     singleToggle.checked = true;
                     singleToggle.dispatchEvent(new Event('change'));
                 }
+                _showRttLoader();
                 _fetchReadyImage(singleName, function (file) {
                     handleFileUpload(file, 'sample');
-                    console.log('RTT: single image loaded');
+                    _waitForPreviewLoad('test', function () {
+                        _hideRttLoader();
+                        console.log('RTT: single image loaded');
+                    });
                 });
             }
         });
@@ -4562,7 +4592,7 @@ function _fetchReadyImage(filename, cb) {
             var file = new File([blob], 'Test' + filename, { type: blob.type || 'image/png' });
             cb(file);
         })
-        .catch(function (err) { console.error('RTT: Error loading ' + filename, err); });
+        .catch(function (err) { console.error('RTT: Error loading ' + filename, err); _hideRttLoader(); });
 }
 
 // ==========================================
