@@ -63,7 +63,7 @@ Name: "startmenuicon"; Description: "Create a Start Menu shortcut"; GroupDescrip
 
 [Files]
 ; Include the entire PyInstaller output folder
-Source: "..\dist\SpectraMatch\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "output\SpectraMatch\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; High-quality icon file for shortcuts (avoids pixelation from EXE-embedded icon)
 Source: "spectramatch.ico"; DestDir: "{app}"; Flags: ignoreversion
 
