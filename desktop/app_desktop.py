@@ -156,6 +156,7 @@ def main():
         min_size=(1024, 700),
         text_select=True,
         zoomable=True,
+        maximized=True,
     )
 
     # Give the API object a reference to the window

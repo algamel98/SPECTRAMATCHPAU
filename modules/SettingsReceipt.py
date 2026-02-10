@@ -158,11 +158,6 @@ def generate_receipt(pdf_path, settings, processed_images, report_id, operator_n
         single_content.append(Paragraph(f"{tr('sampling_mode')}: {sampling_mode_translated}", style_item))
         single_content.append(Paragraph(f"{tr('sampling_count')}: {settings.get('region_count', 5)}", style_item))
         
-        # Test illuminants
-        test_ills = settings.get('test_illuminants', [])
-        if isinstance(test_ills, list) and test_ills:
-            single_content.append(Paragraph(f"{tr('test_illuminants')}: {', '.join(test_ills)}", style_item))
-        
         t_config = Table([[gen_content, single_content]], colWidths=[90*mm, 90*mm])
         t_config.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'TOP'),
@@ -306,7 +301,6 @@ def generate_receipt(pdf_path, settings, processed_images, report_id, operator_n
              ('visualizations', 'visualizations'),
              ('spectral', 'spectral'),
              ('histograms', 'histograms'),
-             ('illuminant_analysis', 'illuminant_analysis'),
              ('fourier', 'fourier'),
              ('recommendations_color', 'recommendations_color'),
          ]

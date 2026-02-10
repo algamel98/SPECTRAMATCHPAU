@@ -98,7 +98,9 @@ function initSingleImageReportSections() {
         { key: 'xyz', labelKey: 'xyz.values', defaultChecked: true },
         { key: 'cmyk', labelKey: 'cmyk.values', defaultChecked: true },
         { key: 'spectral', labelKey: 'spectral.proxy', defaultChecked: true },
-        { key: 'illuminant_analysis', labelKey: 'illuminant.analysis', defaultChecked: true }
+        { key: 'histograms', labelKey: 'rgb.histograms', defaultChecked: true },
+        { key: 'fourier', labelKey: 'fourier.analysis', defaultChecked: true },
+        { key: 'recommendations_color', labelKey: 'recommendations', defaultChecked: true }
     ];
 
     grid.innerHTML = '';
@@ -1701,12 +1703,20 @@ function updateSettingsTabsVisibility(singleMode) {
             tabReports.disabled = true;
         }
 
-        // Keep illuminant tab accessible in single image mode (identical to two-image mode)
+        // Keep illuminant tab accessible in single image mode but disable test illuminants
         if (tabIlluminant) {
             tabIlluminant.classList.remove('tab-disabled');
             tabIlluminant.removeAttribute('aria-disabled');
             tabIlluminant.disabled = false;
         }
+        // Disable test illuminant checkboxes in single image mode
+        document.querySelectorAll('input[name="test_illuminant"]').forEach(function(el) {
+            if (!el._savedSingleCheck) el._savedSingleCheck = el.checked;
+            el.checked = false;
+            el.disabled = true;
+            var lbl = el.closest('label');
+            if (lbl) lbl.style.opacity = '0.4';
+        });
     } else {
         if (tabColor) tabColor.style.display = '';
         if (tabPattern) tabPattern.style.display = '';
@@ -1730,6 +1740,13 @@ function updateSettingsTabsVisibility(singleMode) {
             tabIlluminant.removeAttribute('aria-disabled');
             tabIlluminant.disabled = false;
         }
+        // Re-enable test illuminant checkboxes
+        document.querySelectorAll('input[name="test_illuminant"]').forEach(function(el) {
+            el.disabled = false;
+            if (el._savedSingleCheck !== undefined) { el.checked = el._savedSingleCheck; delete el._savedSingleCheck; }
+            var lbl = el.closest('label');
+            if (lbl) lbl.style.opacity = '';
+        });
     }
 }
 
@@ -3211,7 +3228,7 @@ function collectSettings() {
 
         // Illuminant Settings
         primary_illuminant: getVal('primary_illuminant', 'D65'),
-        test_illuminants: getMultiCheck('test_illuminant'),
+        test_illuminants: isSingleMode ? [getVal('primary_illuminant', 'D65')] : getMultiCheck('test_illuminant'),
 
         // Pattern Unit Tab Inputs
         pattern_scoring_method: getVal('pattern_scoring_method', 'all'),
@@ -3283,14 +3300,14 @@ function collectSettings() {
             'visual_diff': isSingleMode ? getSingleSection('visual_diff', true) : getCheck('sec_visual_diff', true),
             'csi_under_heatmap': getCheck('sec_csi_heatmap', false),
             // Sections - Legacy mappings
-            'illuminant_analysis': isSingleMode ? getSingleSection('illuminant_analysis', true) : getCheck('sec_illuminant_analysis', true),
+            'illuminant_analysis': isSingleMode ? false : getCheck('sec_illuminant_analysis', true),
             'recommendations_color': isSingleMode ? getSingleSection('recommendations_color', true) : getCheck('sec_recommendations', true),
 
             'ssim': getCheck('enable_ssim', true),
             'gradient': getCheck('enable_gradient', true),
             'phase': getCheck('enable_phase', true),
             'structural': getCheck('enable_structural', true),
-            'fourier': getCheck('enable_fourier', true),
+            'fourier': isSingleMode ? getSingleSection('fourier', true) : getCheck('enable_fourier', true),
             'glcm': getCheck('enable_glcm', true),
             'gradient_boundary': getCheck('enable_grad_bound', true),
             'phase_boundary': getCheck('enable_phase_bound', true),

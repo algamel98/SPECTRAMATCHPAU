@@ -10,8 +10,9 @@ from reportlab.lib.enums import TA_CENTER
 from modules import ReportUtils as RU
 from modules.ReportUtils import (
     PDF_FONT_BOLD, PDF_FONT_REGULAR, BLUE1, BLUE2, GREEN, RED, ORANGE,
-    NEUTRAL, NEUTRAL_DARK, StyleTitle, StyleH1, StyleH2, StyleBody, StyleSmall,
-    MARGIN_L, MARGIN_R, MARGIN_T, MARGIN_B, DPI
+    NEUTRAL, NEUTRAL_DARK, NEUTRAL_L, StyleTitle, StyleH1, StyleH2, StyleBody, StyleSmall,
+    MARGIN_L, MARGIN_R, MARGIN_T, MARGIN_B, DPI,
+    BG_LIGHT_RED, BG_LIGHT_GREEN, BG_LIGHT_BLUE
 )
 from modules.ColorUnitBackend import (
     rgb_to_cmyk, srgb_to_xyz, xyz_to_lab, adapt_to_illuminant, WHITE_POINTS,
@@ -277,9 +278,14 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
 
     sections = settings.get('sections', {}) if isinstance(settings.get('sections', {}), dict) else {}
     
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib.enums import TA_LEFT
+    
     story = []
     
-    # --- Standard Cover Page ---
+    # ═══════════════════════════════════════════════════════════════
+    # COVER PAGE (matches Color/Pattern Unit cover style)
+    # ═══════════════════════════════════════════════════════════════
     story.append(Spacer(1, 0.5 * inch))
     logo_path = RU.pick_logo()
     if logo_path:
@@ -291,12 +297,6 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
     story.append(Paragraph(tr('cover_company'), StyleH2))
     story.append(Spacer(1, 0.08*inch))
     
-    # Subtitle
-    from reportlab.lib.styles import ParagraphStyle
-    from reportlab.lib.enums import TA_LEFT
-    from reportlab.lib import colors
-    from reportlab.platypus import Table, TableStyle
-    
     subtitle_style = ParagraphStyle('ElegantSubtitle', parent=StyleSmall, fontSize=9, textColor=NEUTRAL, fontName=PDF_FONT_REGULAR, leading=12, alignment=TA_LEFT)
     story.append(Paragraph(f"<i>{tr('cover_subtitle')}</i>", subtitle_style))
     story.append(Spacer(1, 0.2*inch))
@@ -305,7 +305,7 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
     story.append(badge(f"{tr('primary_illuminant')}: {primary_ill}", back_color=BLUE1))
     story.append(Spacer(1, 0.4*inch))
     
-    # Metadata Table
+    # Metadata Table (same style as Color Unit cover)
     meta_data = [
         [tr('details'), ""],
         [tr('generated_on'), timestamp.strftime("%Y-%m-%d %H:%M:%S")],
@@ -316,8 +316,8 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
     ]
     meta_table = Table(meta_data, colWidths=[2*inch, 3*inch], hAlign="CENTER")
     meta_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), NEUTRAL),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("BACKGROUND", (0, 0), (-1, 0), NEUTRAL_L),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
         ("FONTNAME", (0, 0), (-1, 0), PDF_FONT_BOLD),
         ("FONTNAME", (0, 1), (-1, -1), PDF_FONT_REGULAR),
         ("FONTSIZE", (0, 0), (-1, 0), 10),
@@ -335,207 +335,79 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
     story.append(meta_table)
     story.append(PageBreak())
     
-    # --- Page 2: Visuals & Data ---
-    
-    # Visuals
-    vis_img = sample_img.copy()
-    r_vis = max(12, int(min(vis_img.shape[0], vis_img.shape[1]) * 0.04))
-    
-    for i, point_data in enumerate(points):
-        # Handle both old format (px, py) and new format (px, py, isManual)
-        if isinstance(point_data, tuple) and len(point_data) == 3:
-            gx, gy, is_manual = point_data
-        else:
-            gx, gy = point_data[:2]
-            is_manual = True  # Default to manual for backward compatibility
-        
-        crop_off_x = settings.get('crop_offset_x', 0)
-        crop_off_y = settings.get('crop_offset_y', 0)
-        lx = gx - crop_off_x
-        ly = gy - crop_off_y
-        
-        # Color selection: Green for manual, Orange for random (BGR format)
-        if is_manual:
-            color = (94, 197, 34)  # Green
-        else:
-            color = (22, 115, 249)  # Orange
-        
-        # Enhanced visual design
-        # Draw outer glow circle
-        cv2.circle(vis_img, (lx, ly), r_vis + 2, color, 3)
-        # Draw main circle
-        cv2.circle(vis_img, (lx, ly), r_vis, color, 2)
-        # Draw center dot
-        cv2.circle(vis_img, (lx, ly), 4, color, -1)
-        
-        # Draw label with white outline
-        label_pos = (lx + 8, ly - 8)
-        cv2.putText(vis_img, str(i+1), label_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 4)
-        cv2.putText(vis_img, str(i+1), label_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
-        
-    rl_img = RU.numpy_to_rl(vis_img, max_w=6*inch, max_h=5*inch)
-    if rl_img:
-        rl_img.hAlign = 'CENTER'
-        story.append(rl_img)
-        sample_img_label = 'Analiz Noktaları ile Numune Görüntüsü' if report_lang == 'tr' else 'Sample Image with Analysis Points'
-        story.append(Paragraph(sample_img_label, StyleSmall))
-        
-    story.append(Spacer(1, 20))
-    
-    # Spectral Plot
-    if sections.get('spectral', True) and spectral_plot_path and os.path.exists(spectral_plot_path):
-        spectral_title = 'Spektral Analiz (Vekil)' if report_lang == 'tr' else 'Spectral Analysis (Proxy)'
-        sp_img = RLImage(spectral_plot_path, width=6*inch, height=2.5*inch)
-        sp_img.hAlign = 'CENTER'
-        story.append(KeepTogether([
-            Paragraph(spectral_title, StyleH1),
-            sp_img,
-            Spacer(1, 20),
-        ]))
-
-    if sections.get('illuminant_analysis', True) and measurements:
-        story.append(Spacer(1, 10))
-        ill_heading = Paragraph(tr('illuminant_analysis'), StyleH1)
-        ill_heading_used = False
-
-        ill_list = settings.get('test_illuminants', [])
-        if not isinstance(ill_list, list):
-            ill_list = []
-
-        if primary_ill not in ill_list:
-            ill_list = [primary_ill] + ill_list
-
-        # Filter to valid illuminants only
-        ill_list = [ill for ill in ill_list if ill in WHITE_POINTS]
-
-        if ill_list:
-            # Per-illuminant table: one table per illuminant with per-point Lab* values
-            mean_label = 'Ortalama' if report_lang == 'tr' else 'Mean'
-            pt_label = 'Pt'
-
-            for ill in ill_list:
-                white_point = WHITE_POINTS[ill]
-                ill_subtitle = f"{tr('illuminant')}: {ill}"
-
-                header = [pt_label, 'L*', 'a*', 'b*']
-                rows = [header]
-
-                lab_values = []
-                for m in measurements:
-                    rgb01 = m['rgb'] / 255.0
-                    xyz_d65 = srgb_to_xyz(rgb01)
-                    xyz_adapted = adapt_to_illuminant(xyz_d65, ill)
-                    lab = xyz_to_lab(xyz_adapted, white_point)
-                    lab_values.append(lab)
-                    rows.append([str(m['id']), f"{lab[0]:.2f}", f"{lab[1]:.2f}", f"{lab[2]:.2f}"])
-
-                # Mean row
-                if lab_values:
-                    mean_lab = np.mean(lab_values, axis=0)
-                    rows.append([mean_label, f"{mean_lab[0]:.2f}", f"{mean_lab[1]:.2f}", f"{mean_lab[2]:.2f}"])
-
-                t_ill = RU.make_table(rows, colWidths=[50, 70, 70, 70])
-
-                # Style: highlight header and mean row
-                extra_styles = [
-                    ('BACKGROUND', (0, 0), (-1, 0), BLUE2),
-                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                    ('FONTNAME', (0, 0), (-1, 0), PDF_FONT_BOLD),
-                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                    ('GRID', (0, 0), (-1, -1), 0.4, colors.Color(0.8, 0.8, 0.8)),
-                ]
-                if lab_values:
-                    mean_row_idx = len(rows) - 1
-                    extra_styles.append(('BACKGROUND', (0, mean_row_idx), (-1, mean_row_idx), colors.Color(0.93, 0.95, 0.98)))
-                    extra_styles.append(('FONTNAME', (0, mean_row_idx), (-1, mean_row_idx), PDF_FONT_BOLD))
-                t_ill.setStyle(TableStyle(extra_styles))
-
-                kt_items = []
-                if not ill_heading_used:
-                    kt_items.append(ill_heading)
-                    ill_heading_used = True
-                kt_items.extend([
-                    Spacer(1, 8),
-                    Paragraph(ill_subtitle, StyleH2),
-                    t_ill,
-                    Spacer(1, 12),
-                ])
-                story.append(KeepTogether(kt_items))
-
-        if not ill_heading_used:
-            story.append(ill_heading)
-        
-    story.append(Spacer(1, 30))
-    
-    # Measurements Table
+    # ═══════════════════════════════════════════════════════════════
+    # COLOR SPACES — same order, design, and coloring as Color Unit
+    # (RGB → Lab* with detailed stats + visualization → XYZ → CMYK)
+    # ═══════════════════════════════════════════════════════════════
     if measurements:
-        any_meas_tables = any([
+        any_color_space = any([
             sections.get('rgb', True),
             sections.get('lab', True),
             sections.get('xyz', True),
             sections.get('cmyk', True),
         ])
 
-        if any_meas_tables:
-            meas_title = 'Ölçüm Verileri' if report_lang == 'tr' else 'Measurement Data'
-            meas_heading = Paragraph(meas_title, StyleH1)
-            meas_heading_used = False
-        
-        # 1. RGB Table
+        if any_color_space:
+            metrics_heading = Paragraph(tr('color_metrics'), StyleH1)
+            metrics_heading_used = False
+
+        # 1. RGB Table (Color-Unit style with colored column backgrounds)
         if sections.get('rgb', True):
-            rgb_title = 'RGB Değerleri' if report_lang == 'tr' else 'RGB Values'
-            pos_label = 'Konum' if report_lang == 'tr' else 'Position'
-            rgb_header = ["Pt", pos_label, "R", "G", "B"]
+            pos_label = tr('point') if hasattr(tr, '__call__') else 'Pt'
+            rgb_header = [tr('region'), tr('point') if report_lang != 'en' else 'Position', "R", "G", "B"]
             rgb_data = [rgb_header]
             for m in measurements:
-                 r, g, b = m['rgb']
-                 pos_str = f"({m['pos'][0]}, {m['pos'][1]})"
-                 rgb_data.append([str(m['id']), pos_str, f"{int(r)}", f"{int(g)}", f"{int(b)}"])
-            
-            t_rgb = RU.make_table(rgb_data, colWidths=[30, 80, 50, 50, 50])
+                r_val, g_val, b_val = m['rgb']
+                pos_str = f"({m['pos'][0]}, {m['pos'][1]})"
+                rgb_data.append([str(m['id']), pos_str, f"{int(r_val)}", f"{int(g_val)}", f"{int(b_val)}"])
+
+            t_rgb = RU.make_table(rgb_data, colWidths=[0.6*inch, 1.2*inch, 0.9*inch, 0.9*inch, 0.9*inch])
+            t_rgb.setStyle(TableStyle([
+                ('BACKGROUND', (2, 1), (2, -1), BG_LIGHT_RED),
+                ('BACKGROUND', (3, 1), (3, -1), BG_LIGHT_GREEN),
+                ('BACKGROUND', (4, 1), (4, -1), BG_LIGHT_BLUE),
+            ]))
             kt_items = []
-            if any_meas_tables and not meas_heading_used:
-                kt_items.append(meas_heading)
-                meas_heading_used = True
+            if any_color_space and not metrics_heading_used:
+                kt_items.append(metrics_heading)
+                metrics_heading_used = True
             kt_items.extend([
-                Paragraph(rgb_title, StyleH2),
+                Paragraph(tr('rgb_values'), StyleH2),
                 t_rgb,
-                Spacer(1, 15),
+                Spacer(1, 0.15*inch),
             ])
             story.append(KeepTogether(kt_items))
 
-        # 2. Lab* Color Space Analysis (enhanced)
+        # 2. Lab* Color Space Analysis (enhanced — matches Color Unit)
         if sections.get('lab', True):
-            # Per-point Lab* values table
-            lab_title = f'Lab* Değerleri ({primary_ill})' if report_lang == 'tr' else f'Lab* Values ({primary_ill})'
+            lab_title = f'Lab* {tr("values")} ({primary_ill})' if report_lang != 'tr' else f'Lab* Değerleri ({primary_ill})'
             lab_header = ["Pt", "L*", "a*", "b*"]
             lab_data = [lab_header]
             lab_vals = []
             for m in measurements:
-                 l, a, b_ = m['lab']
-                 lab_data.append([str(m['id']), f"{l:.2f}", f"{a:.2f}", f"{b_:.2f}"])
-                 lab_vals.append((l, a, b_))
-                 
-            t_lab = RU.make_table(lab_data, colWidths=[30, 60, 60, 60])
+                l_val, a_val, b_val = m['lab']
+                lab_data.append([str(m['id']), f"{l_val:.2f}", f"{a_val:.2f}", f"{b_val:.2f}"])
+                lab_vals.append((l_val, a_val, b_val))
+
+            t_lab = RU.make_table(lab_data, colWidths=[0.6*inch, 1.2*inch, 1.2*inch, 1.2*inch])
             kt_items = []
-            if any_meas_tables and not meas_heading_used:
-                kt_items.append(meas_heading)
-                meas_heading_used = True
+            if any_color_space and not metrics_heading_used:
+                kt_items.append(metrics_heading)
+                metrics_heading_used = True
             kt_items.extend([
                 Paragraph(lab_title, StyleH2),
                 t_lab,
-                Spacer(1, 10),
+                Spacer(1, 0.1*inch),
             ])
             story.append(KeepTogether(kt_items))
-            
+
             # Lab* statistics summary
             if lab_vals:
-                import math as _math
                 all_L = [v[0] for v in lab_vals]
                 all_a = [v[1] for v in lab_vals]
                 all_b = [v[2] for v in lab_vals]
-                
-                stat_title = tr('lab_detailed_analysis') if hasattr(tr, '__call__') else 'Detailed Lab* Color Space Analysis'
+
+                stat_title = tr('lab_detailed_analysis')
                 stat_header = [tr('component'), tr('average'), tr('std_dev'), tr('minimum'), tr('maximum')]
                 stat_rows = [stat_header]
                 stat_rows.append(["L* (" + tr('lightness') + ")", f"{np.mean(all_L):.2f}", f"{np.std(all_L):.2f}", f"{np.min(all_L):.2f}", f"{np.max(all_L):.2f}"])
@@ -545,9 +417,9 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
                 story.append(KeepTogether([
                     Paragraph(stat_title, StyleH2),
                     t_stat,
-                    Spacer(1, 10),
+                    Spacer(1, 0.1*inch),
                 ]))
-                
+
                 # Lab* bar chart visualization
                 if sections.get('visualizations', True):
                     plot_dir = os.path.dirname(out_path)
@@ -556,43 +428,43 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
                     means = [np.mean(all_L), np.mean(all_a), np.mean(all_b)]
                     stds = [np.std(all_L), np.std(all_a), np.std(all_b)]
                     fig, ax = plt.subplots(figsize=(5, 3))
-                    x = np.arange(len(labels_chart))
-                    bars = ax.bar(x, means, 0.5, yerr=stds, color=['#3498DB', '#E74C3C', '#F1C40F'], edgecolor='white', linewidth=0.5, capsize=4)
-                    ax.set_xticks(x)
+                    x_pos = np.arange(len(labels_chart))
+                    ax.bar(x_pos, means, 0.5, yerr=stds, color=['#3498DB', '#E74C3C', '#F1C40F'], edgecolor='white', linewidth=0.5, capsize=4)
+                    ax.set_xticks(x_pos)
                     ax.set_xticklabels(labels_chart)
-                    vis_title = tr('lab_components_mean') if hasattr(tr, '__call__') else 'Lab Components – Mean'
+                    vis_title = tr('lab_components_mean')
                     ax.set_title(vis_title, fontsize=11, fontweight='bold')
                     ax.grid(True, alpha=0.15, axis='y')
                     plt.tight_layout()
                     plt.savefig(bar_path, dpi=150, bbox_inches="tight")
                     plt.close()
-                    
-                    vis_section_title = tr('lab_visualizations') if hasattr(tr, '__call__') else 'Lab* Visualizations'
+
+                    vis_section_title = tr('lab_visualizations')
                     story.append(KeepTogether([
                         Paragraph(vis_section_title, StyleH2),
                         RLImage(bar_path, 4.5*inch, 2.5*inch),
-                        Spacer(1, 15),
+                        Spacer(1, 0.15*inch),
                     ]))
                     _temp_files.append(bar_path)
 
         # 3. XYZ Table
         if sections.get('xyz', True):
-            xyz_title = f'XYZ Değerleri ({primary_ill})' if report_lang == 'tr' else f'XYZ Values ({primary_ill})'
+            xyz_title = f'XYZ {tr("values")} ({primary_ill})' if report_lang != 'tr' else f'XYZ Değerleri ({primary_ill})'
             xyz_header = ["Pt", "X", "Y", "Z"]
             xyz_data = [xyz_header]
             for m in measurements:
-                 x, y, z = m['xyz']
-                 xyz_data.append([str(m['id']), f"{x:.2f}", f"{y:.2f}", f"{z:.2f}"])
-                 
-            t_xyz = RU.make_table(xyz_data, colWidths=[30, 60, 60, 60])
+                x_val, y_val, z_val = m['xyz']
+                xyz_data.append([str(m['id']), f"{x_val:.2f}", f"{y_val:.2f}", f"{z_val:.2f}"])
+
+            t_xyz = RU.make_table(xyz_data, colWidths=[0.6*inch, 1.2*inch, 1.2*inch, 1.2*inch])
             kt_items = []
-            if any_meas_tables and not meas_heading_used:
-                kt_items.append(meas_heading)
-                meas_heading_used = True
+            if any_color_space and not metrics_heading_used:
+                kt_items.append(metrics_heading)
+                metrics_heading_used = True
             kt_items.extend([
                 Paragraph(xyz_title, StyleH2),
                 t_xyz,
-                Spacer(1, 15),
+                Spacer(1, 0.15*inch),
             ])
             story.append(KeepTogether(kt_items))
 
@@ -602,21 +474,84 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
             cmyk_header = ["Pt", "C", "M", "Y", "K"]
             cmyk_data = [cmyk_header]
             for m in measurements:
-                 c, mm, y, k = m['cmyk']
-                 cmyk_data.append([str(m['id']), f"{c:.2f}", f"{mm:.2f}", f"{y:.2f}", f"{k:.2f}"])
-                 
-            t_cmyk = RU.make_table(cmyk_data, colWidths=[30, 50, 50, 50, 50])
+                c_val, m_val, y_val, k_val = m['cmyk']
+                cmyk_data.append([str(m['id']), f"{c_val:.2f}", f"{m_val:.2f}", f"{y_val:.2f}", f"{k_val:.2f}"])
+
+            t_cmyk = RU.make_table(cmyk_data, colWidths=[0.6*inch, 1.0*inch, 1.0*inch, 1.0*inch, 1.0*inch])
             kt_items = []
-            if any_meas_tables and not meas_heading_used:
-                kt_items.append(meas_heading)
-                meas_heading_used = True
+            if any_color_space and not metrics_heading_used:
+                kt_items.append(metrics_heading)
+                metrics_heading_used = True
             kt_items.extend([
                 Paragraph(cmyk_title, StyleH2),
                 t_cmyk,
+                Spacer(1, 0.2*inch),
             ])
             story.append(KeepTogether(kt_items))
 
-    # RGB Histograms (Single Image)
+    # ═══════════════════════════════════════════════════════════════
+    # VISUALS — Sample image with points, Spectral proxy, Histogram
+    # ═══════════════════════════════════════════════════════════════
+    vis_img = sample_img.copy()
+    r_vis = max(12, int(min(vis_img.shape[0], vis_img.shape[1]) * 0.04))
+
+    for i, point_data in enumerate(points):
+        if isinstance(point_data, tuple) and len(point_data) == 3:
+            gx, gy, is_manual = point_data
+        else:
+            gx, gy = point_data[:2]
+            is_manual = True
+
+        crop_off_x = settings.get('crop_offset_x', 0)
+        crop_off_y = settings.get('crop_offset_y', 0)
+        lx = gx - crop_off_x
+        ly = gy - crop_off_y
+
+        color = (94, 197, 34) if is_manual else (22, 115, 249)
+
+        cv2.circle(vis_img, (lx, ly), r_vis + 2, color, 3)
+        cv2.circle(vis_img, (lx, ly), r_vis, color, 2)
+        cv2.circle(vis_img, (lx, ly), 4, color, -1)
+
+        label_pos = (lx + 8, ly - 8)
+        cv2.putText(vis_img, str(i+1), label_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 4)
+        cv2.putText(vis_img, str(i+1), label_pos, cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+
+    viz_heading = Paragraph(tr('visualizations'), StyleH1)
+    viz_heading_used = False
+
+    rl_img = RU.numpy_to_rl(vis_img, max_w=6*inch, max_h=4.5*inch)
+    if rl_img:
+        rl_img.hAlign = 'CENTER'
+        sample_img_label = 'Analiz Noktaları ile Numune Görüntüsü' if report_lang == 'tr' else 'Sample Image with Analysis Points'
+        kt_items = []
+        if not viz_heading_used:
+            kt_items.append(viz_heading)
+            viz_heading_used = True
+        kt_items.extend([
+            rl_img,
+            Paragraph(sample_img_label, StyleSmall),
+            Spacer(1, 0.15*inch),
+        ])
+        story.append(KeepTogether(kt_items))
+
+    # Spectral Plot
+    if sections.get('spectral', True) and spectral_plot_path and os.path.exists(spectral_plot_path):
+        spectral_desc = tr('spectral_analysis') + " (" + tr('spectral_proxy') + ")"
+        sp_img = RLImage(spectral_plot_path, width=6*inch, height=2.5*inch)
+        sp_img.hAlign = 'CENTER'
+        kt_items = []
+        if not viz_heading_used:
+            kt_items.append(viz_heading)
+            viz_heading_used = True
+        kt_items.extend([
+            Paragraph(spectral_desc, StyleH2),
+            sp_img,
+            Spacer(1, 0.15*inch),
+        ])
+        story.append(KeepTogether(kt_items))
+
+    # RGB Histograms
     if sections.get('histograms', True):
         try:
             import tempfile as _tmpmod_hist
@@ -626,22 +561,27 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
             plot_rgb_histogram(sample_img, hist_path, title=hist_title)
             hist_interp = tr('histogram_interpretation_single')
 
-            story.append(Spacer(1, 0.3 * inch))
-            story.append(KeepTogether([
+            kt_items = []
+            if not viz_heading_used:
+                kt_items.append(viz_heading)
+                viz_heading_used = True
+            kt_items.extend([
                 Paragraph(tr('histograms_title'), StyleH2),
                 RLImage(hist_path, 5.5*inch, 3.0*inch),
                 Spacer(1, 0.1*inch),
                 Paragraph(f"<i>{hist_interp}</i>", StyleSmall),
-                Spacer(1, 0.2*inch),
-            ]))
-
+                Spacer(1, 0.15*inch),
+            ])
+            story.append(KeepTogether(kt_items))
             _temp_files.append(hist_path)
         except Exception as e:
             print(f"Error in Single Image RGB Histogram: {e}")
             import traceback
             traceback.print_exc()
 
-    # Fourier Domain Analysis (Single Image)
+    # ═══════════════════════════════════════════════════════════════
+    # FOURIER DOMAIN ANALYSIS — starts on a new page
+    # ═══════════════════════════════════════════════════════════════
     if sections.get('fourier', True):
         try:
             import tempfile as _tmpmod
@@ -650,23 +590,16 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
             spectrum_path = os.path.join(_fda_tmp, "fft_spectrum_single.png")
             plot_fft_spectrum(fda_result, spectrum_path, title=tr('fft_spectrum_title'))
 
-            story.append(Spacer(1, 0.3 * inch))
+            story.append(PageBreak())
 
             if os.path.exists(spectrum_path):
                 story.append(KeepTogether([
-                    Paragraph(tr('fourier_title'), StyleTitle),
-                    Spacer(1, 0.1 * inch),
+                    Paragraph(tr('fourier_title'), StyleH1),
+                    Spacer(1, 0.05 * inch),
                     Paragraph(f"<i>{tr('fourier_subtitle')}</i>", StyleSmall),
                     Spacer(1, 0.15 * inch),
-                    Paragraph(tr('fft_spectrum_title'), StyleH1),
+                    Paragraph(tr('fft_spectrum_title'), StyleH2),
                     RLImage(spectrum_path, 5.0*inch, 3.8*inch),
-                    Spacer(1, 0.15 * inch),
-                ]))
-            else:
-                story.append(KeepTogether([
-                    Paragraph(tr('fourier_title'), StyleTitle),
-                    Spacer(1, 0.1 * inch),
-                    Paragraph(f"<i>{tr('fourier_subtitle')}</i>", StyleSmall),
                     Spacer(1, 0.15 * inch),
                 ]))
 
@@ -677,44 +610,25 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
                 peak_data = [peak_header]
                 for i, p in enumerate(fda_peaks):
                     peak_data.append([f"P{i+1}", f"{p['radius']:.2f}", f"{p['angle']:.2f}", f"{p['magnitude']:.2f}"])
-                t_peaks = Table(peak_data, colWidths=[1.0*inch, 1.5*inch, 1.5*inch, 1.5*inch], hAlign="LEFT")
-                t_peaks.setStyle(TableStyle([
-                    ("BACKGROUND", (0, 0), (-1, 0), BLUE2),
-                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                    ("FONTNAME", (0, 0), (-1, 0), PDF_FONT_BOLD),
-                    ("FONTNAME", (0, 1), (-1, -1), PDF_FONT_REGULAR),
-                    ("FONTSIZE", (0, 0), (-1, -1), 9),
-                    ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#BDC3C7")),
-                    ("ALIGN", (1, 0), (-1, -1), "CENTER"),
-                    ("BACKGROUND", (0, 1), (-1, -1), colors.whitesmoke),
-                ]))
+                t_peaks = RU.make_table(peak_data, colWidths=[1.0*inch, 1.5*inch, 1.5*inch, 1.5*inch])
                 story.append(KeepTogether([
-                    Paragraph(tr('fourier_peaks_title'), StyleH1),
+                    Paragraph(tr('fourier_peaks_title'), StyleH2),
                     t_peaks,
                     Spacer(1, 0.2 * inch),
                 ]))
 
-            # Metrics Table (single image — no Reference column)
+            # Metrics Table
             met_header = [tr('metric'), tr('value')]
             met_data = [met_header,
                 [tr('fundamental_period'), f"{fda_result['fundamental_period']:.2f}"],
                 [tr('dominant_orientation'), f"{fda_result['dominant_orientation']:.2f}"],
                 [tr('anisotropy_ratio'), f"{fda_result['anisotropy']:.2f}"],
             ]
-            t_met = Table(met_data, colWidths=[2.5*inch, 2.0*inch], hAlign="LEFT")
-            t_met.setStyle(TableStyle([
-                ("BACKGROUND", (0, 0), (-1, 0), BLUE2),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("FONTNAME", (0, 0), (-1, 0), PDF_FONT_BOLD),
-                ("FONTNAME", (0, 1), (-1, -1), PDF_FONT_REGULAR),
-                ("FONTSIZE", (0, 0), (-1, -1), 9),
-                ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#BDC3C7")),
-                ("ALIGN", (1, 0), (-1, -1), "CENTER"),
-                ("BACKGROUND", (0, 1), (-1, -1), colors.whitesmoke),
-            ]))
+            t_met = RU.make_table(met_data, colWidths=[2.5*inch, 2.0*inch])
             story.append(KeepTogether([
-                Paragraph(tr('fourier_metrics_title'), StyleH1),
+                Paragraph(tr('fourier_metrics_title'), StyleH2),
                 t_met,
+                Spacer(1, 0.2*inch),
             ]))
 
             _temp_files.append(spectrum_path)
@@ -723,7 +637,9 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
             import traceback
             traceback.print_exc()
 
-    # Recommendations & Conclusions (via RecommendationsEngine)
+    # ═══════════════════════════════════════════════════════════════
+    # RECOMMENDATIONS & CONCLUSIONS
+    # ═══════════════════════════════════════════════════════════════
     if sections.get('recommendations_color', True) and measurements:
         from modules.RecommendationsEngine import generate_single_image_recommendations, render_findings_to_flowables
 

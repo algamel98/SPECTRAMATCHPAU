@@ -141,7 +141,8 @@ var T={en:{
 'rpt.fourier.single':'Fourier Spectrum','rpt.fourier.single.caption':'2D FFT magnitude spectrum showing frequency-domain characteristics.',
 'rpt.score.color':'Color','rpt.score.pattern':'Pattern','rpt.score.overall':'Overall',
 'rpt.dl.full':'Full Report','rpt.dl.color':'Color Report','rpt.dl.pattern':'Pattern Report','rpt.dl.receipt':'Settings Receipt',
-'rpt.decision.accept':'ACCEPT','rpt.decision.reject':'REJECT','rpt.decision.conditional':'CONDITIONAL','rpt.decision.complete':'COMPLETE'
+'rpt.decision.accept':'ACCEPT','rpt.decision.reject':'REJECT','rpt.decision.conditional':'CONDITIONAL','rpt.decision.complete':'COMPLETE',
+'exit.title':'Close SpectraMatch?','exit.warning':'Unsaved data and reports may be lost.','exit.cancel':'Cancel','exit.close':'Close'
 },tr:{
 'menu.file':'Dosya','menu.open.ref':'Referans Görüntü Aç...','menu.open.sample':'Örnek Görüntü Aç...',
 'menu.delete.all':'Tüm Görüntüleri Sil','menu.exit':'Çıkış','menu.analysis':'Analiz','menu.run':'Analizi Çalıştır',
@@ -264,7 +265,8 @@ var T={en:{
 'rpt.fourier.single':'Fourier Spektrumu','rpt.fourier.single.caption':'Frekans alan\u0131 \u00f6zelliklerini g\u00f6steren 2D FFT b\u00fcy\u00fckl\u00fck spektrumu.',
 'rpt.score.color':'Renk','rpt.score.pattern':'Desen','rpt.score.overall':'Genel',
 'rpt.dl.full':'Tam Rapor','rpt.dl.color':'Renk Raporu','rpt.dl.pattern':'Desen Raporu','rpt.dl.receipt':'Ayar Makbuzu',
-'rpt.decision.accept':'KABUL','rpt.decision.reject':'RED','rpt.decision.conditional':'KOŞULLU','rpt.decision.complete':'TAMAMLANDI'
+'rpt.decision.accept':'KABUL','rpt.decision.reject':'RED','rpt.decision.conditional':'KOŞULLU','rpt.decision.complete':'TAMAMLANDI',
+'exit.title':'SpectraMatch Kapatılsın mı?','exit.warning':'Kaydedilmemiş veriler ve raporlar kaybolabilir.','exit.cancel':'İptal','exit.close':'Kapat'
 }};
 
 function t(k){return(T[State.lang]||T.en)[k]||(T.en)[k]||k;}
@@ -402,7 +404,7 @@ function handleMenu(cmd){
         case 'documentation':$('datasheetDialog').style.display='';break;
         case 'release-notes':$('releaseNotesDialog').style.display='';break;
         case 'check-updates':$('checkUpdatesDialog').style.display='';break;
-        case 'exit':window.close();break;
+        case 'exit':$('exitDialog').style.display='';break;
     }
 }
 
@@ -1284,6 +1286,7 @@ function updateUI(){
 
 /* ═══ Disable report sections not available in Single Image mode ═══ */
 var _savedDualChecks={};
+var _savedTestIllChecks={};
 function updateReportSectionsForMode(){
     /* Color sections NOT in Single Image report (require two images) */
     var colorOnlyIds=['rptColorSpaces','rptDiffMetrics','rptStats','rptVisualDiff'];
@@ -1307,6 +1310,22 @@ function updateReportSectionsForMode(){
         var lbl=el.closest('label');
         if(lbl) lbl.classList.toggle('disabled',isSingle);
     });
+    /* Disable Test Illuminant checkboxes in Single Image mode */
+    document.querySelectorAll('input[name="propTestIll"]').forEach(function(el){
+        if(isSingle){
+            if(!(el.value in _savedTestIllChecks)) _savedTestIllChecks[el.value]=el.checked;
+            el.checked=false;
+            el.disabled=true;
+        }else{
+            el.disabled=false;
+            if(el.value in _savedTestIllChecks){el.checked=_savedTestIllChecks[el.value];delete _savedTestIllChecks[el.value];}
+        }
+        var lbl=el.closest('label');
+        if(lbl) lbl.classList.toggle('disabled',isSingle);
+    });
+    /* Visually dim the Test Illuminants label */
+    var tiLabel=document.querySelector('.prop-label-row[data-i18n="prop.test.illuminants"]');
+    if(tiLabel) tiLabel.classList.toggle('disabled',isSingle);
 }
 
 /* ═══ Settings Collection ═══ */
@@ -1314,7 +1333,12 @@ function collectSettings(){
     function num(id,d){var e=$(id);if(!e)return d;var v=parseFloat(e.value);return isNaN(v)?d:v;}
     function val(id,d){var e=$(id);return e?e.value:d;}
     function chk(id,d){var e=$(id);return e?e.checked:d;}
-    var ti=[];document.querySelectorAll('input[name="propTestIll"]:checked').forEach(function(e){ti.push(e.value);});
+    var ti=[];
+    if(State.singleMode){
+        ti=[val('propIlluminant','D65')];
+    }else{
+        document.querySelectorAll('input[name="propTestIll"]:checked').forEach(function(e){ti.push(e.value);});
+    }
     /* Points are already in pixel coordinates */
     var pts=State.manualPoints.concat(State.randomPoints);
     return {
@@ -1356,10 +1380,10 @@ function collectSettings(){
             'visualizations':chk('rptVisualizations',true),'spectral':chk('rptSpectral',true),
             'histograms':chk('rptHistograms',true),
             'visual_diff':chk('rptVisualDiff',true),'csi_under_heatmap':false,
-            'illuminant_analysis':chk('rptIlluminant',true),'recommendations_color':chk('rptRecommendations',true),
+            'illuminant_analysis':State.singleMode?false:chk('rptIlluminant',true),'recommendations_color':chk('rptRecommendations',true),
             'ssim':chk('rptEnableSsim',true),'gradient':chk('rptEnableGradient',true),
             'phase':chk('rptEnablePhase',true),'structural':chk('rptEnableStructural',true),
-            'fourier':chk('rptEnableFourier',true),
+            'fourier':State.singleMode?true:chk('rptEnableFourier',true),
             'glcm':chk('rptEnableGlcm',true),
             'gradient_boundary':chk('rptGradBound',true),'phase_boundary':chk('rptPhaseBound',true),
             'recommendations_pattern':chk('rptPatternRec',true)},
