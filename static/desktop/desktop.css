@@ -196,13 +196,34 @@ input, select, textarea, button { font-family: inherit; font-size: inherit; }
 }
 
 .menu-action {
-    padding: 4px 24px 4px 12px;
+    padding: 4px 24px 4px 24px;
     cursor: default;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 24px;
     white-space: nowrap;
+    position: relative;
+}
+
+.menu-action::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    position: absolute;
+    left: 6px;
+}
+
+.menu-action.checked::before {
+    content: '\2713';
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+}
+
+.menu-action.checked {
+    background: rgba(0, 120, 215, 0.12);
 }
 
 .menu-action:hover {
@@ -212,6 +233,10 @@ input, select, textarea, button { font-family: inherit; font-size: inherit; }
 
 .menu-action:hover .menu-shortcut {
     color: rgba(255,255,255,0.7);
+}
+
+.menu-action.checked:hover::before {
+    color: #fff;
 }
 
 .menu-shortcut {
@@ -1465,6 +1490,9 @@ input, select, textarea, button { font-family: inherit; font-size: inherit; }
 .rpt-kpi-value.good { color: var(--success); }
 .rpt-kpi-value.warn { color: var(--warning); }
 .rpt-kpi-value.bad { color: var(--error); }
+
+/* ─── Info Note ─── */
+.rpt-info-note { font-size: 10px; color: var(--text-dim); background: rgba(0,120,215,0.08); border-left: 2px solid var(--accent); border-radius: 0 4px 4px 0; padding: 6px 10px; margin: 6px 0 10px; line-height: 1.5; }
 
 /* ─── Section Title ─── */
 .rpt-section-title {

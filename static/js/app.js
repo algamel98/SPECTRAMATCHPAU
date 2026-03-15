@@ -1,6 +1,6 @@
 /**
  * Textile QC System - Main Application
- * Version 2.2.3 - With Progress Tracking
+ * Version 3.0.0 - With Image Alignment Studio
  */
 
 // ==========================================
@@ -10,6 +10,7 @@ var AppState = {
     sessionId: null,
     refFile: null,
     testFile: null,
+    sampleFile: null, // Alias for testFile for clarity
     shapeType: 'circle',
     shapeSize: 100,
     processFullImage: true,
@@ -2393,7 +2394,7 @@ function buildDetailedResults(data) {
 
         /* Summary metric cards */
         html += '<div class="wrpt-summary-grid">';
-        html += _wrptSummaryCard(_wrptSvg('bar'), t('rpt.color.scoring'), data.color_method_label || 'Delta E 2000', '');
+        html += _wrptSummaryCard(_wrptSvg('bar'), t('rpt.color.scoring'), data.color_method_label || 'DeltaEP2000%', '');
         html += _wrptSummaryCard(_wrptSvg('grid'), t('rpt.pattern.scoring'), data.pattern_method_label || 'All (Average)', '');
         if (data.csi_value !== undefined) {
             var csiC = data.csi_value >= 90 ? 'good' : (data.csi_value >= 70 ? 'warn' : 'bad');
@@ -2450,10 +2451,13 @@ function buildDetailedResults(data) {
                 var csi2 = data.csi_value >= 90 ? 'good' : (data.csi_value >= 70 ? 'warn' : 'bad');
                 html += '<div class="wrpt-kpi"><span class="wrpt-kpi-label">CSI</span><span class="wrpt-kpi-value ' + csi2 + '">' + data.csi_value.toFixed(1) + '%</span></div>';
             }
-            html += '<div class="wrpt-kpi"><span class="wrpt-kpi-label">' + t('rpt.method') + '</span><span class="wrpt-kpi-value">' + (data.color_method_label || '\u0394E2000') + '</span></div>';
+            html += '<div class="wrpt-kpi"><span class="wrpt-kpi-label">' + t('rpt.method') + '</span><span class="wrpt-kpi-value">' + (data.color_method_label || 'DeltaEP2000%') + '</span></div>';
             html += '<div class="wrpt-kpi"><span class="wrpt-kpi-label">' + t('rpt.status') + '</span><span class="wrpt-status-badge ' + cStC + '">' + cSt + '</span></div>';
         }
         html += '</div>';
+        if (data.color_method_label === 'DeltaEP2000%') {
+            html += '<div class="wrpt-info-note">&#9432; ' + t('rpt.deltaep2000.note') + '</div>';
+        }
 
         if (data.color_regions && data.color_regions.length) {
             html += '<div class="wrpt-section-title">' + t('rpt.regional.color.metrics') + '</div>';
@@ -2836,6 +2840,7 @@ function deleteImages() {
             AppState.sessionId = null;
             AppState.refFile = null;
             AppState.testFile = null;
+            AppState.sampleFile = null;
             AppState.pdfFilename = null;
             AppState.settingsPdfFilename = null;
 
@@ -2895,6 +2900,7 @@ function deleteImage(type) {
                 AppState.refFile = null;
             } else {
                 AppState.testFile = null;
+                AppState.sampleFile = null;
             }
 
             var preview = document.getElementById(prefix + 'Preview');
@@ -3160,6 +3166,54 @@ function resetSettings() {
 
 
 // ==========================================
+// Alignment Studio (v3.0.0)
+// ==========================================
+
+function openAlignmentStudio() {
+    if (typeof AlignmentStudio === 'undefined') {
+        console.error('AlignmentStudio module not loaded');
+        return;
+    }
+
+    // Get image sources from the current page
+    var refImg = document.getElementById('refPreview') || document.getElementById('ref_image_preview');
+    var sampleImg = document.getElementById('samplePreview') || document.getElementById('sample_image_preview');
+
+    var refSrc = null;
+    var sampleSrc = null;
+    var refFile = null;
+    var sampleFile = null;
+
+    if (refImg && refImg.src && refImg.style.display !== 'none') {
+        refSrc = refImg.src;
+    }
+    if (sampleImg && sampleImg.src && sampleImg.style.display !== 'none') {
+        sampleSrc = sampleImg.src;
+    }
+
+    // Try to get file objects from AppState
+    if (typeof AppState !== 'undefined') {
+        refFile = AppState.refFile || null;
+        sampleFile = AppState.sampleFile || null;
+    }
+
+    // Get current region data
+    var regionData = null;
+    if (typeof RegionSelector !== 'undefined' && RegionSelector.getRegionData) {
+        regionData = RegionSelector.getRegionData();
+    }
+
+    AlignmentStudio.open({
+        refSrc: refSrc,
+        sampleSrc: sampleSrc,
+        refFile: refFile,
+        sampleFile: sampleFile,
+        regionData: regionData,
+        isDesktop: false,
+    });
+}
+
+// ==========================================
 // Report Language Selector
 // ==========================================
 
@@ -3202,7 +3256,8 @@ function collectSettings() {
         operator: getVal('operator_name', 'Operator'),
         timezone_offset: getNum('timezone_offset', 3),
         report_lang: localStorage.getItem('textile_qc_report_lang') || 'en',
-        
+        alignment_mode: getVal('alignment_mode', 'direct'),
+
         // Analysis Unit Toggles
         enable_color_unit: true,
         enable_pattern_unit: true,

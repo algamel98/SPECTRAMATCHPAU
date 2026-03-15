@@ -270,7 +270,7 @@ def _generate_pdf(sample_img, measurements, points, out_path, settings, timestam
     
     primary_ill = settings.get('primary_illuminant', 'D65')
     operator = settings.get('operator', 'Unknown')
-    software_ver = "2.2.3"
+    software_ver = "3.0.0"
     
     # Get report language and translator
     report_lang = settings.get('report_lang', 'en')

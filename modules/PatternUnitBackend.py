@@ -35,7 +35,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 # CONFIGURATION
 # =================================================================================================
 
-SOFTWARE_VERSION = "2.2.3"
+SOFTWARE_VERSION = "3.0.0"
 COMPANY_NAME = "Textile Engineering Solutions"
 COMPANY_SUBTITLE = "Professional Pattern Analysis Solutions"
 REPORT_TITLE = "Pattern Analysis Report"

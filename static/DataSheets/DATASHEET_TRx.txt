@@ -1,4 +1,4 @@
-% SPECTRAMATCH Teknik Veri Sayfası (Türkçe) — v2.2.3
+% SPECTRAMATCH Teknik Veri Sayfası (Türkçe) — v3.0.0
 % Pamukkale Üniversitesi, Elektrik ve Elektronik Mühendisliği Bölümü
 \documentclass[11pt,a4paper]{report}
 \usepackage[utf8]{inputenc}
@@ -36,7 +36,7 @@
 
 \pagestyle{fancy}\fancyhf{}
 \fancyhead[L]{\small\textcolor{specblue}{\textbf{SpectraMatch}} \textcolor{specgray}{| Teknik Veri Sayfası}}
-\fancyhead[R]{\small\textcolor{specgray}{v2.2.3}}
+\fancyhead[R]{\small\textcolor{specgray}{v3.0.0}}
 \fancyfoot[C]{\small\textcolor{specgray}{\thepage}}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0.2pt}
@@ -72,7 +72,7 @@
 
 \vspace{1.2cm}
 
-{\large\itshape\textcolor{specblue}{Sürüm: 2.2.3}}
+{\large\itshape\textcolor{specblue}{Sürüm: 3.0.0}}
 
 \vspace{1.2cm}
 \textbf{Hazırlayan:} Abdelbary Algamel\\[0.1cm]
@@ -84,7 +84,7 @@
 \textbf{||} Pamukkale Üniversitesi\\[0.1cm]
 Elektrik ve Elektronik Mühendisliği Bölümü, Denizli, Türkiye
 \vfill
-{\small\textcolor{specgray}{Bu belge, SpectraMatch v2.2.3 sürümünün mevcut yeteneklerini yansıtmaktadır.}}
+{\small\textcolor{specgray}{Bu belge, SpectraMatch v3.0.0 sürümünün mevcut yeteneklerini yansıtmaktadır.}}
 \end{center}
 \end{titlepage}
 
@@ -223,7 +223,25 @@ Gelişmiş Ayarlar paneli beş alt bölüm halinde düzenlenmiştir:
 \item Rapor dili (uygulama dilinden bağımsız)
   \item Operatör adı (raporlara dahil edilir).
   \item Saat dilimi farkı (UTC, rapor zaman damgaları ve kimlik oluşturma için kullanılır).
+  \item Görüntü hizalama modu (analiz öncesi uygulanan ön işleme tekniği).
 \end{itemize}
+
+\subsubsection{Görüntü Hizalama Stüdyosu}
+Görüntü çekimi sırasında, küçük kamera pozisyon kaymaları referans ve numune görüntüleri arasında küçük öteleme, döndürme veya ölçek farklılıkları oluşturabilir. Bu geometrik hizalama bozuklukları, renk ve desen fark puanlarını yapay olarak şişirebilir. Hizalama Stüdyosu, analiz öncesi bu çekim varyasyonlarını düzeltmek için 10 ön işleme tekniği sağlar:
+
+\textbf{Doğrudan Piksel Karşılaştırma:} Ön işleme yok. Çekim koşulları mükemmel kontrol edildiğinde kullanın.
+
+\textbf{Kademeli ECC Kaydı:} İki aşamalı yoğunluk tabanlı hizalama. Önce ötelemeyi kilitler, gerekirse afin dönüşümle iyileştirir. Tekrarlayan tekstil desenleri için kararlıdır.
+
+\textbf{ORB Afin Hizalama:} RANSAC ile ORB anahtar noktaları kullanarak özellik tabanlı hizalama. Perspektif bozulması olmayan gerçekçi kumaş kaymaları için homografi yerine afin tercih eder.
+
+\textbf{Alt Piksel Öteleme:} Faz korelasyonu kullanarak saf X/Y kayma düzeltmesi. Yalnızca öteleme hizalama bozukluğu için en hızlı teknik.
+
+\textbf{Piramit Kaba-İnce:} Çok ölçekli ECC piramidi. Düşük çözünürlükte kaba hizalama tahmin eder, tam çözünürlükte iyileştirir. Tekrarlayan dokuma desenleri için çok dayanıklıdır.
+
+\textbf{Karo Tabanlı Yerel İyileştirme:} Genel ECC ötelemesi ardından karo başına faz korelasyonu. Genel kaymadan sonra kalan yerel hizalama bozukluğunu düzeltir.
+
+Seçilen teknik, ön işleme sırasında otomatik olarak uygulanır. Hizalama Stüdyosu, bir tekniğe karar vermeden önce tekniklerin etkileşimli test edilmesine ve karşılaştırılmasına olanak tanır.
 
 \subsection{Renk}
 \begin{itemize}[leftmargin=1.5em]
@@ -270,7 +288,7 @@ Raporlar, seçilen dilde PDF dosyaları olarak oluşturulur. Her rapor, otomatik
 
 \section{Sürekli İyileştirme}
 
-Proje, v2.2.3 sürümünün ötesinde aktif olarak geliştirilmektedir. İyileştirmeler; gerçek kullanım gözlemleri, yapılandırılmış testler ve akademik araştırma gereksinimleri doğrultusunda yönlendirilmektedir.
+Proje, v3.0.0 sürümünün ötesinde aktif olarak geliştirilmektedir. İyileştirmeler; gerçek kullanım gözlemleri, yapılandırılmış testler ve akademik araştırma gereksinimleri doğrultusunda yönlendirilmektedir.
 
 % ════════════════════════════════════════════════════════════════════════════
 % BÖLÜM 2 — SİSTEM İŞLEME BİRİMLERİ
@@ -627,6 +645,26 @@ CSI2000, 100 üzerinden bir değer olarak gösterilir. Daha yüksek değerler da
 
 \subsubsection{Nasıl Değerlendirilir}
 CSI2000, genel renk benzerliğini (CSI) nokta bazlı renk doğruluğuyla ($\Delta E_{2000}$ Puanı) dengeler. CSI ile aynı iyi/uyarı eşik değerlerine göre değerlendirilir.
+
+\subsection{DeltaEP2000\% ($\Delta E$ Yüzde Puanı)}
+
+\subsubsection{Tanım ve Amaç}
+\textbf{DeltaEP2000\%}, SpectraMatch'in varsayılan renk puanlama yöntemidir. Ortalama $\Delta E_{2000}$ değerini, puanlama arayüzünde kullanılmak üzere 0--100 arasında bir yüzde puanına dönüştürür. ``P'' harfi \emph{Percentage} (Yüzde) anlamına gelir; ``\%'' son eki ise sonucun ham bir kolorimetrik mesafe değil, normalleştirilmiş bir puan olduğunu gösterir.
+
+\subsubsection{Standart $\Delta E_{2000}$'den Farkı}
+Standart $\Delta E_{2000}$, sabit bir üst sınırı olmayan mutlak bir algısal mesafedir — 0 değeri özdeş renkleri, 5'in üzerindeki değerler ise genellikle önemli uyumsuzlukları ifade eder. Bu değer doğrudan yüzde olarak yorumlanamaz.
+
+DeltaEP2000\%, bu sınırsız değeri doğrusal bir ters çevirme ile 0--100 ölçeğine eşler; böylece CSI ve desen puanları gibi diğer yüzde tabanlı metriklerle birlikte puan karşılaştırması ve gösterimi için uygun hale gelir.
+
+\subsubsection{Nasıl Hesaplanır}
+\[
+\mathrm{DeltaEP2000\%} = \max\!\Big(0,\; \min\!\big(100,\; 100 - \overline{\Delta E}_{2000} \times 10\big)\Big)
+\]
+Burada $\overline{\Delta E}_{2000}$, tüm örnekleme noktalarındaki ortalama $\Delta E_{2000}$ değeridir. Ortalama $\Delta E_{2000}$ = 0 ise puan 100 (mükemmel eşleşme); 10 veya üzerinde ise puan 0 olur.
+
+\begin{quote}
+\small\textit{Not: DeltaEP2000\%, türetilmiş bir puanlama kolaylık metriğidir. Ham $\Delta E_{2000}$ değerleri her zaman ayrıca Fark Metrikleri tablosunda ve özet istatistiklerinde raporlanır.}
+\end{quote}
 
 \subsection{Öneriler}
 
@@ -1180,7 +1218,7 @@ SpectraMatch aşağıdaki teknolojiler kullanılarak geliştirilmiştir:
 
 \begin{table}[H]
 \centering
-\caption{SpectraMatch v2.2.3'te kullanılan teknoloji yığını.}
+\caption{SpectraMatch v3.0.0'te kullanılan teknoloji yığını.}
 \label{tab:tech_stack}
 \begin{tabularx}{\textwidth}{l l X}
 \toprule
@@ -1546,7 +1584,7 @@ XYZ        & CIE XYZ Renk Uzayı \\
 % ────────────────────────────────────────────────────────────────────────────
 % EK C — BİLİNEN SINIRLAMALAR VE PLANLANAN İYİLEŞTİRMELER
 % ────────────────────────────────────────────────────────────────────────────
-\chapter{Bilinen Sınırlamalar \texorpdfstring{{\small\textcolor{specred}{(v2.2.3)}}}{(v2.2.3)}}
+\chapter{Bilinen Sınırlamalar \texorpdfstring{{\small\textcolor{specred}{(v3.0.0)}}}{(v3.0.0)}}
 \label{app:limitations}
 
 \vspace{-0.3cm}
@@ -1580,7 +1618,7 @@ XYZ        & CIE XYZ Renk Uzayı \\
         \centering
         \small
         \textbf{Mevcut Durum:}
-        SpectraMatch v2.2.3, referans ve numune görüntülerini seçilen bölgeye kırptıktan sonra \textbf{piksel piksel} karşılaştırır. Geometrik hizalama adımı yoktur. Bu, sistemin her iki görüntünün zaten uzaysal olarak tescilli olduğunu --- aynı görüş açısından, aynı ölçekte ve aynı çerçevelemeyle çekildiğini --- varsaydığı anlamına gelir.
+        SpectraMatch v3.0.0, referans ve numune görüntülerini seçilen bölgeye kırptıktan sonra \textbf{piksel piksel} karşılaştırır. Geometrik hizalama adımı yoktur. Bu, sistemin her iki görüntünün zaten uzaysal olarak tescilli olduğunu --- aynı görüş açısından, aynı ölçekte ve aynı çerçevelemeyle çekildiğini --- varsaydığı anlamına gelir.
 
         \medskip
         \textbf{Sınırlama:}
@@ -1641,7 +1679,7 @@ XYZ        & CIE XYZ Renk Uzayı \\
 
 \vspace{0.6cm}
 
-{\large\itshape\textcolor{specgray}{Sürüm 2.2.3}}
+{\large\itshape\textcolor{specgray}{Sürüm 3.0.0}}
 
 \vspace{0.1cm}
 
@@ -1666,7 +1704,7 @@ XYZ        & CIE XYZ Renk Uzayı \\
 
 \vspace{0.8cm}
 
-{\small\textcolor{specgray}{Bu belge, SpectraMatch v2.2.3 dağıtımının bir parçasıdır.}}\\[0.15cm]
+{\small\textcolor{specgray}{Bu belge, SpectraMatch v3.0.0 dağıtımının bir parçasıdır.}}\\[0.15cm]
 {\small\textcolor{specgray}{Tüm içerik proje kaynak kodundan türetilmiştir ve}}\\[0.15cm]
 {\small\textcolor{specgray}{yayın tarihindeki sistemin mevcut yeteneklerini yansıtmaktadır.}}
 

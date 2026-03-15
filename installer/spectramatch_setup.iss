@@ -15,7 +15,7 @@
 ; ============================================================
 
 #define MyAppName "SpectraMatch"
-#define MyAppVersion "2.2.3"
+#define MyAppVersion "3.0.0"
 #define MyAppPublisher "SpectraMatch"
 #define MyAppURL "https://abdelbary.com"
 #define MyAppExeName "SpectraMatch.exe"

@@ -62,7 +62,7 @@ var T={en:{
 'btab.console':'Console','btab.results':'Results','btab.clear':'Clear',
 'results.empty':'Run an analysis to see results here.','sb.ready':'Ready',
 'sb.mode':'Mode','sb.region':'Region','sb.images':'Images','sb.processing':'Processing...','sb.custom':'Custom',
-'log.init':'SpectraMatch Desktop v2.2.3 initialized','log.session.restored':'Session restored',
+'log.init':'SpectraMatch Desktop v3.0.0 initialized','log.session.restored':'Session restored',
 'log.theme':'Theme','log.language':'Language','log.region':'Region','log.shape':'Shape',
 'log.loaded':'Loaded','log.region.center.set':'Region center set','log.console.cleared':'Console cleared',
 'log.panel.toggled':'Panel toggled','log.settings.reset':'All settings reset to defaults',
@@ -110,6 +110,7 @@ var T={en:{
 'rpt.texture.frequency':'Texture & Frequency Analysis','rpt.single.image.analysis':'Single Image Analysis',
 'rpt.color.scoring.label':'Color Scoring','rpt.pattern.scoring.label':'Pattern Scoring',
 'rpt.csi.label':'CSI (Color Similarity)','rpt.mean.de2000':'Mean \u0394E 2000','rpt.report.size.label':'Report Size',
+'rpt.deltaep2000.note':'DeltaEP2000% is a percentage score derived from \u0394E 2000: Score\u00a0=\u00a0max(0,\u00a0min(100,\u00a0100\u00a0\u2212\u00a0mean(\u0394E\u2082\u2080\u2080\u2080)\u00a0\u00d7\u00a010)). Unlike raw \u0394E 2000 (absolute perceptual distance with no upper bound), DeltaEP2000% maps it to a 0\u201390 scale for scoring purposes only.',
 'rpt.structural.change':'Structural Change','rpt.color.comparison':'Color Comparison',
 'rpt.reference':'Reference','rpt.sample':'Sample','rpt.regional.color.metrics':'Regional Color Metrics',
 'rpt.de.summary.stats':'\u0394E Summary Statistics','rpt.illuminant.analysis':'Illuminant Analysis',
@@ -186,7 +187,7 @@ var T={en:{
 'btab.console':'Konsol','btab.results':'Sonuçlar','btab.clear':'Temizle',
 'results.empty':'Sonuçları görmek için bir analiz çalıştırın.','sb.ready':'Hazır',
 'sb.mode':'Mod','sb.region':'Bölge','sb.images':'Görüntüler','sb.processing':'İşleniyor...','sb.custom':'Özel',
-'log.init':'SpectraMatch Desktop v2.2.3 başlatıldı','log.session.restored':'Oturum geri yüklendi',
+'log.init':'SpectraMatch Desktop v3.0.0 başlatıldı','log.session.restored':'Oturum geri yüklendi',
 'log.theme':'Tema','log.language':'Dil','log.region':'Bölge','log.shape':'Şekil',
 'log.loaded':'Yüklendi','log.region.center.set':'Bölge merkezi ayarlandı','log.console.cleared':'Konsol temizlendi',
 'log.panel.toggled':'Panel değiştirildi','log.settings.reset':'Tüm ayarlar varsayılanlara sıfırlandı',
@@ -234,6 +235,7 @@ var T={en:{
 'rpt.texture.frequency':'Doku ve Frekans Analizi','rpt.single.image.analysis':'Tek Görüntü Analizi',
 'rpt.color.scoring.label':'Renk Puanlama','rpt.pattern.scoring.label':'Desen Puanlama',
 'rpt.csi.label':'RSE (Renk Benzerliği)','rpt.mean.de2000':'Ortalama \u0394E 2000','rpt.report.size.label':'Rapor Boyutu',
+'rpt.deltaep2000.note':'DeltaEP2000%, \u0394E\u00a02000\'den t\u00fcretilen bir y\u00fczde puan\u0131d\u0131r: Puan\u00a0=\u00a0max(0,\u00a0min(100,\u00a0100\u00a0\u2212\u00a0ortalama(\u0394E\u2082\u2080\u2080\u2080)\u00a0\u00d7\u00a010)). Ham \u0394E\u00a02000\'den (s\u0131n\u0131rs\u0131z mutlak alg\u0131sal mesafe) farkl\u0131 olarak, DeltaEP2000% yaln\u0131zca puanlama i\u00e7in 0\u2013100 \u00f6l\u00e7e\u011fine d\u00f6n\u00fc\u015ft\u00fcr\u00fcr.',
 'rpt.structural.change':'Yapısal Değişim','rpt.color.comparison':'Renk Karşılaştırması',
 'rpt.reference':'Referans','rpt.sample':'Numune','rpt.regional.color.metrics':'Bölgesel Renk Metrikleri',
 'rpt.de.summary.stats':'\u0394E Özet İstatistikleri','rpt.illuminant.analysis':'Aydınlatıcı Analizi',
@@ -322,6 +324,8 @@ document.addEventListener('DOMContentLoaded',function(){
     var restored=restoreState();
     if(restored){log(t('log.session.restored'),'info');}
     updateUI();updateRegionOverlays();updateSamplingUI();
+    /* Sync View menu checkmarks with actual panel visibility */
+    _syncViewMenuChecks();
     /* Wire auto-save to property inputs */
     document.querySelectorAll('#panelProperties input, #panelProperties select').forEach(function(el){
         el.addEventListener('change',scheduleSave);
@@ -419,6 +423,20 @@ function exportResults(){
     }
 }
 
+/* Map panel id → data-action value on the View menu item */
+var _panelActionMap={'bottomPanel':'toggle-console','panelWorkspace':'toggle-workspace','panelProperties':'toggle-properties'};
+
+function _syncViewMenuChecks(){
+    Object.keys(_panelActionMap).forEach(function(panelId){
+        var action=_panelActionMap[panelId];
+        var el=$(panelId);
+        var menuEl=document.querySelector('.menu-action[data-action="'+action+'"]');
+        if(!menuEl)return;
+        var visible=el&&!el.classList.contains('hidden');
+        menuEl.classList.toggle('checked',!!visible);
+    });
+}
+
 function togglePanel(id){
     var el=$(id);el.classList.toggle('hidden');
     var isHidden=el.classList.contains('hidden');
@@ -428,6 +446,12 @@ function togglePanel(id){
     }
     if(id==='panelWorkspace'&&$('resizeWorkspace'))$('resizeWorkspace').style.display=isHidden?'none':'';
     if(id==='panelProperties'&&$('resizeProperties'))$('resizeProperties').style.display=isHidden?'none':'';
+    /* Sync View menu checkmarks */
+    var action=_panelActionMap[id];
+    if(action){
+        var menuEl=document.querySelector('.menu-action[data-action="'+action+'"]');
+        if(menuEl)menuEl.classList.toggle('checked',!isHidden);
+    }
     /* Redraw region overlays after layout change */
     setTimeout(function(){if(!State.fullImage)updateRegionOverlays();},50);
     scheduleSave();
@@ -1343,7 +1367,7 @@ function collectSettings(){
     var pts=State.manualPoints.concat(State.randomPoints);
     return {
         operator:val('propOperator','Operator'),timezone_offset:num('propTimezone',3),
-        report_lang:val('propReportLang','en'),
+        report_lang:val('propReportLang','en'),alignment_mode:val('propAlignmentMode','direct'),
         enable_color_unit:true,enable_pattern_unit:true,enable_pattern_repetition:false,
         color_scoring_method:val('propColorScoringMethod','delta_e'),
         color_threshold_pass:num('propColorPass',2.0),color_threshold_conditional:num('propColorCond',5.0),
@@ -1531,7 +1555,7 @@ function displayResults(result){
         html+='<div class="rpt-summary-card">';
         html+='<div class="rpt-summary-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg></div>';
         html+='<div class="rpt-summary-body"><div class="rpt-summary-title">'+t('rpt.color.scoring.label')+'</div>';
-        html+='<div class="rpt-summary-val">'+(result.color_method_label||'Delta E 2000')+'</div></div></div>';
+        html+='<div class="rpt-summary-val">'+(result.color_method_label||'DeltaEP2000%')+'</div></div></div>';
         html+='<div class="rpt-summary-card">';
         html+='<div class="rpt-summary-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>';
         html+='<div class="rpt-summary-body"><div class="rpt-summary-title">'+t('rpt.pattern.scoring.label')+'</div>';
@@ -1608,10 +1632,13 @@ function displayResults(result){
                 var csiCls2=result.csi_value>=90?'good':(result.csi_value>=70?'warn':'bad');
                 html+='<div class="rpt-kpi"><span class="rpt-kpi-label">CSI</span><span class="rpt-kpi-value '+csiCls2+'">'+result.csi_value.toFixed(1)+'%</span></div>';
             }
-            html+='<div class="rpt-kpi"><span class="rpt-kpi-label">'+t('rpt.method')+'</span><span class="rpt-kpi-value">'+(result.color_method_label||'\u0394E2000')+'</span></div>';
+            html+='<div class="rpt-kpi"><span class="rpt-kpi-label">'+t('rpt.method')+'</span><span class="rpt-kpi-value">'+(result.color_method_label||'DeltaEP2000%')+'</span></div>';
             html+='<div class="rpt-kpi"><span class="rpt-kpi-label">'+t('rpt.status')+'</span><span class="rpt-status-badge '+cStCls+'">'+cSt+'</span></div>';
         }
         html+='</div>';
+        if(result.color_method_label==='DeltaEP2000%'){
+            html+='<div class="rpt-info-note">ℹ️ '+t('rpt.deltaep2000.note')+'</div>';
+        }
 
         if(sec.diff_metrics&&result.color_regions&&result.color_regions.length){
             html+='<div class="rpt-section-title">'+t('rpt.regional.color.metrics')+'</div>';
@@ -2253,8 +2280,20 @@ document.addEventListener('change',function(e){
     if(!isNaN(mx)&&v>mx)el.value=mx;
 });
 
+/* ═══ Alignment Studio (v3.0.0) ═══ */
+function openAlignmentStudio(){
+    if(typeof AlignmentStudio==='undefined'){log('AlignmentStudio module not loaded','error');return;}
+    var refSrc=State.refDataUrl||null;
+    var sampleSrc=State.sampleDataUrl||null;
+    var refFile=State.refFile||null;
+    var sampleFile=State.sampleFile||null;
+    var regionData=buildRegionData();
+    AlignmentStudio.open({refSrc:refSrc,sampleSrc:sampleSrc,refFile:refFile,sampleFile:sampleFile,regionData:regionData,isDesktop:true});
+}
+
 /* ═══ Public API (for inline onclick) ═══ */
 return {closeAlert:function(){$('alertDialog').style.display='none';},
         saveAs:saveAsDownload,
-        resetToDefault:resetToDefault};
+        resetToDefault:resetToDefault,
+        openAlignmentStudio:openAlignmentStudio};
 })();

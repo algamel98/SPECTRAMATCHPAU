@@ -1,4 +1,4 @@
-% SPECTRAMATCH Technical Datasheet (English) — v2.2.3
+% SPECTRAMATCH Technical Datasheet (English) — v3.0.0
 % Pamukkale University, Dept. of Electrical and Electronic Engineering
 \documentclass[11pt,a4paper]{report}
 \usepackage[utf8]{inputenc}
@@ -36,7 +36,7 @@
 
 \pagestyle{fancy}\fancyhf{}
 \fancyhead[L]{\small\textcolor{specblue}{\textbf{SpectraMatch}} \textcolor{specgray}{| Technical Datasheet}}
-\fancyhead[R]{\small\textcolor{specgray}{v2.2.3}}
+\fancyhead[R]{\small\textcolor{specgray}{v3.0.0}}
 \fancyfoot[C]{\small\textcolor{specgray}{\thepage}}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0.2pt}
@@ -72,7 +72,7 @@
 
 \vspace{1.2cm}
 
-{\large\itshape\textcolor{specblue}{Version: 2.2.3}}
+{\large\itshape\textcolor{specblue}{Version: 3.0.0}}
 
 \vspace{1.2cm}
 
@@ -82,7 +82,7 @@ Department of Electrical and Electronic Engineering, Denizli, Turkey\\[0.4cm]
 \textbf{Author:} Abdelbary Algamel\\[0.1cm]
 \textbf{Supervisor:} Dr.\ Adem Ükte}
 \vfill
-{\small\textcolor{specgray}{This document reflects the actual capabilities of SpectraMatch v2.2.3.}}
+{\small\textcolor{specgray}{This document reflects the actual capabilities of SpectraMatch v3.0.0.}}
 \end{center}
 \end{titlepage}
 
@@ -221,7 +221,25 @@ The Advanced Settings panel is organized into five subsections:
 \item Report language (different from the application language)
   \item Operator name (included in reports).
   \item Timezone offset (UTC, used for report timestamps and ID generation).
+  \item Image alignment mode (preprocessing technique applied before analysis).
 \end{itemize}
+
+\subsubsection{Image Alignment Studio}
+During image capture, minor camera position shifts can introduce small translation, rotation, or scale differences between reference and sample images. These geometric misalignments can artificially inflate color and pattern difference scores. The Alignment Studio provides 10 preprocessing techniques to correct these capture variations before analysis:
+
+\textbf{Direct Pixel Comparison:} No preprocessing. Use when capture conditions are perfectly controlled.
+
+\textbf{Cascading ECC Registration:} Two-stage intensity-based alignment. Locks translation first, then refines with affine transform if needed. Stable for repetitive textile patterns.
+
+\textbf{ORB Affine Alignment:} Feature-based alignment using ORB keypoints with RANSAC. Prefers affine over homography for realistic fabric shifts without perspective distortion.
+
+\textbf{Subpixel Translation:} Pure X/Y shift correction using phase correlation. Fastest technique for translation-only misalignment.
+
+\textbf{Pyramid Coarse-to-Fine:} Multi-scale ECC pyramid. Estimates rough alignment at low resolution, refines at full resolution. Very robust for repetitive weave patterns.
+
+\textbf{Tile-Based Local Refinement:} Global ECC translation followed by per-tile phase correlation. Corrects residual local misalignment after global shift.
+
+The selected technique is applied automatically during preprocessing. The Alignment Studio allows interactive testing and comparison of techniques before committing to one.
 
 \subsection{Color}
 \begin{itemize}[leftmargin=1.5em]
@@ -268,7 +286,7 @@ Reports are generated as PDF files in the selected language. Each report is name
 
 \section{Continuous Improvement}
 
-The project is actively refined beyond version 2.2.3. Improvements are driven by real-world usage observations, structured testing, and academic research requirements.
+The project is actively refined beyond version 3.0.0. Improvements are driven by real-world usage observations, structured testing, and academic research requirements.
 
 % ════════════════════════════════════════════════════════════════════════════
 % CHAPTER 2 — SYSTEM PROCESSING UNITS
@@ -625,6 +643,26 @@ CSI2000 is displayed as a value out of 100. Higher is better.
 
 \subsubsection{How to Evaluate}
 CSI2000 balances global color similarity (CSI) with point-specific color accuracy ($\Delta E_{2000}$ Score). It is evaluated against the same good/warning thresholds as CSI.
+
+\subsection{DeltaEP2000\% (ΔE Percentage Score)}
+
+\subsubsection{Definition and Purpose}
+\textbf{DeltaEP2000\%} is the default color scoring method in SpectraMatch. It converts the mean $\Delta E_{2000}$ value into a 0--100 percentage score for use in the scoring interface. The ``P'' stands for \emph{Percentage}, and the ``\%'' suffix indicates that the result is a normalized score, not a raw colorimetric distance.
+
+\subsubsection{Difference from Standard $\Delta E_{2000}$}
+Standard $\Delta E_{2000}$ is an absolute perceptual distance with no fixed upper bound — a value of 0 means identical colors, and values above 5 are generally considered significant mismatches. It cannot be directly interpreted as a percentage.
+
+DeltaEP2000\% maps this unbounded value onto a 0--100 scale using a linear inversion, making it suitable for score-based comparison and display alongside other percentage-based metrics (CSI, pattern scores).
+
+\subsubsection{How It Is Calculated}
+\[
+\mathrm{DeltaEP2000\%} = \max\!\Big(0,\; \min\!\big(100,\; 100 - \overline{\Delta E}_{2000} \times 10\big)\Big)
+\]
+where $\overline{\Delta E}_{2000}$ is the mean $\Delta E_{2000}$ across all sampling points. A mean $\Delta E_{2000}$ of 0 yields a score of 100 (perfect match); a mean of 10 or above yields 0.
+
+\begin{quote}
+\small\textit{Note: DeltaEP2000\% is a derived scoring convenience metric. The underlying raw $\Delta E_{2000}$ values are always reported separately in the Difference Metrics table and summary statistics.}
+\end{quote}
 
 \subsection{Recommendations}
 
@@ -1179,7 +1217,7 @@ SpectraMatch is built using the following technologies:
 
 \begin{table}[H]
 \centering
-\caption{Technology stack used in SpectraMatch v2.2.3.}
+\caption{Technology stack used in SpectraMatch v3.0.0.}
 \label{tab:tech_stack}
 \begin{tabularx}{\textwidth}{l l X}
 \toprule
@@ -1544,7 +1582,7 @@ XYZ        & CIE XYZ Color Space \\
 % ────────────────────────────────────────────────────────────────────────────
 % APPENDIX C — KNOWN LIMITATIONS AND PLANNED IMPROVEMENTS
 % ────────────────────────────────────────────────────────────────────────────
-\chapter{Known Limitations \texorpdfstring{{\small\textcolor{specred}{(v2.2.3)}}}{(v2.2.3)}}
+\chapter{Known Limitations \texorpdfstring{{\small\textcolor{specred}{(v3.0.0)}}}{(v3.0.0)}}
 \label{app:limitations}
 
 \vspace{-0.3cm}
@@ -1553,7 +1591,7 @@ XYZ        & CIE XYZ Color Space \\
 \begin{tikzpicture}
   \node[rounded corners=6pt, draw=specred, line width=1.2pt, fill=specred!6, inner sep=10pt, text width=0.88\textwidth, align=center] {
     {\large\bfseries\textcolor{specred}{\symbol{"26A0}~Planned for v2.3.0 --- Not Yet Implemented~\symbol{"26A0}}}\\[4pt]
-    {\small\textcolor{specdark}{The items listed below are known limitations of SpectraMatch v2.2.3.\\They are documented here for transparency and are scheduled to be addressed in the next release.}}
+    {\small\textcolor{specdark}{The items listed below are known limitations of SpectraMatch v3.0.0.\\They are documented here for transparency and are scheduled to be addressed in the next release.}}
   };
 \end{tikzpicture}
 \end{center}
@@ -1561,7 +1599,7 @@ XYZ        & CIE XYZ Color Space \\
 \vspace{0.4cm}
 
 \noindent\textcolor{specgray}{\small Each item is marked with a status indicator:
-\;\textcolor{specred}{\rule{8pt}{8pt}}\;\textbf{Not implemented}\;---\;feature does not exist in v2.2.3.}
+\;\textcolor{specred}{\rule{8pt}{8pt}}\;\textbf{Not implemented}\;---\;feature does not exist in v3.0.0.}
 
 \vspace{0.6cm}
 
@@ -1652,7 +1690,7 @@ XYZ        & CIE XYZ Color Space \\
         \centering
         \small
         \textbf{Current State:}
-        SpectraMatch v2.2.3 compares the reference and sample images \textbf{pixel by pixel} after cropping to the selected region. There is no geometric alignment step. This means the system assumes that both images are already spatially registered --- captured from the same viewing angle, at the same scale, and with the same framing.
+        SpectraMatch v3.0.0 compares the reference and sample images \textbf{pixel by pixel} after cropping to the selected region. There is no geometric alignment step. This means the system assumes that both images are already spatially registered --- captured from the same viewing angle, at the same scale, and with the same framing.
 
         \medskip
         \textbf{Limitation:}
@@ -1720,7 +1758,7 @@ XYZ        & CIE XYZ Color Space \\
 
 \vspace{0.6cm}
 
-{\large\itshape\textcolor{specgray}{Version 2.2.3}}
+{\large\itshape\textcolor{specgray}{Version 3.0.0}}
 
 \vspace{0.1cm}
 
@@ -1745,7 +1783,7 @@ XYZ        & CIE XYZ Color Space \\
 
 \vspace{0.8cm}
 
-{\small\textcolor{specgray}{This document is part of the SpectraMatch v2.2.3 distribution.}}\\[0.15cm]
+{\small\textcolor{specgray}{This document is part of the SpectraMatch v3.0.0 distribution.}}\\[0.15cm]
 {\small\textcolor{specgray}{All content is derived from the project source code and reflects}}\\[0.15cm]
 {\small\textcolor{specgray}{the actual capabilities of the system at the time of publication.}}
 

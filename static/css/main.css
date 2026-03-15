@@ -1757,6 +1757,9 @@ body {
 .wrpt-kpi-value.warn { color: #ffb300; }
 .wrpt-kpi-value.bad { color: #ff3d00; }
 
+/* Info Note */
+.wrpt-info-note { font-size: 11px; color: #475569; background: #f0f7ff; border-left: 3px solid #0284c7; border-radius: 0 6px 6px 0; padding: 8px 12px; margin: 8px 0 12px; line-height: 1.5; }
+
 /* Section Title */
 .wrpt-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #0066cc; margin-top: 16px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0; }
 

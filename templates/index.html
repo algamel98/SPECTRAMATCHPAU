@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/static/css/main.css">
     <link rel="stylesheet" href="/static/css/image-actions.css">
     <link rel="stylesheet" href="/static/css/shape-dropdown.css">
+    <link rel="stylesheet" href="/static/css/alignment-studio.css">
     <link rel="icon" type="image/png" href="/static/images/logo_square_no_name_1024x1024.png">
 </head>
 
@@ -144,7 +145,7 @@
                 </svg>
                 <span class="btn-text-group">
                     <span class="btn-main-text" data-i18n="download.desktop">Download for Windows</span>
-                    <span class="btn-sub-text">Desktop v2.2.3</span>
+                    <span class="btn-sub-text">Desktop v3.0.0</span>
                 </span>
                 <svg class="download-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -296,7 +297,7 @@
                 </div>
             </div>
 
-            <span class="version-badge">v2.2.3</span>
+            <span class="version-badge">v3.0.0</span>
         </div>
     </header>
 
@@ -892,6 +893,46 @@
 
                     </div>
 
+                    <!-- Image Alignment Mode (v3.0.0) -->
+                    <div class="settings-group alignment-mode-section">
+                        <div class="settings-group-header">
+                            <h3 data-i18n="align.section.title">Image Alignment Mode</h3>
+                        </div>
+                        <p class="settings-group-desc" data-i18n="align.section.desc">Select preprocessing technique for image alignment before comparison analysis.</p>
+
+                        <div class="setting-row">
+                            <div class="setting-label">
+                                <label data-i18n="align.mode.label">Alignment Technique</label>
+                                <small data-i18n="align.mode.desc">Choose how images are aligned before pixel comparison</small>
+                            </div>
+                            <div class="alignment-mode-row">
+                                <select id="alignment_mode" class="form-control alignment-mode-select">
+                                    <option value="direct" selected data-i18n="align.name.direct">Direct Pixel Comparison</option>
+                                    <option value="orb_homography" data-i18n="align.name.orb_homography">Feature-Based Alignment</option>
+                                    <option value="ecc_alignment" data-i18n="align.name.ecc_alignment">Intensity-Based Alignment (ECC)</option>
+                                    <option value="phase_correlation" data-i18n="align.name.phase_correlation">Phase Correlation Alignment</option>
+                                    <option value="ai_smart_match" data-i18n="align.name.ai_smart_match">AI Smart Region Matching</option>
+                                    <option value="cascading_ecc" data-i18n="align.name.cascading_ecc">Cascading ECC Registration</option>
+                                    <option value="orb_affine" data-i18n="align.name.orb_affine">ORB Affine Alignment</option>
+                                    <option value="subpixel_translation" data-i18n="align.name.subpixel_translation">Subpixel Translation</option>
+                                    <option value="pyramid_align" data-i18n="align.name.pyramid_align">Pyramid Coarse-to-Fine</option>
+                                    <option value="tile_refine" data-i18n="align.name.tile_refine">Tile-Based Local Refinement</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-label">
+                                <label data-i18n="align.studio.label">Alignment Studio</label>
+                                <small data-i18n="align.studio.desc">Test and compare techniques visually before applying</small>
+                            </div>
+                            <button type="button" class="btn-alignment-studio" id="btnAlignmentStudio" onclick="openAlignmentStudio()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+                                <span data-i18n="align.open.studio">Open Alignment Studio</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Selection Region Settings -->
                     <div class="settings-group">
                         <div class="settings-group-header">
@@ -1093,7 +1134,7 @@
                                 <small data-i18n="scoring.basis.desc">Determines the primary color score</small>
                             </div>
                             <select id="color_scoring_method" class="form-control" style="width: 180px;">
-                                <option value="delta_e" selected>Delta E 2000</option>
+                                <option value="delta_e" selected>DeltaEP2000%</option>
                                 <option value="csi">CSI</option>
                                 <option value="csi2000">CSI2000</option>
                             </select>
@@ -1921,6 +1962,7 @@
     <script src="/static/js/region-selector.js"></script>
     <script src="/static/js/region-validator.js"></script>
     <script src="/static/js/app.js"></script>
+    <script src="/static/js/alignment-studio.js"></script>
     <script src="/static/js/development-modal.js"></script>
 
     <!-- Datasheet Info Modal -->
@@ -1979,7 +2021,7 @@
                 </svg>
                 <span data-i18n="dl.fallback.btn">Download Now</span>
             </a>
-            <div class="dl-fallback-version">SpectraMatch Desktop v2.2.3</div>
+            <div class="dl-fallback-version">SpectraMatch Desktop v3.0.0</div>
         </div>
     </div>
 

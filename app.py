@@ -160,14 +160,14 @@ def download_desktop_installer():
     """Serve the Windows desktop installer (.exe).
     
     Priority order:
-      1. Local build  (installer/output/SpectraMatch_Setup_2.2.3.exe)
+      1. Local build  (installer/output/SpectraMatch_Setup_3.0.0.exe)
       2. DESKTOP_INSTALLER_URL env-var override (if set)
       3. Default GitHub Release redirect
     """
     from flask import redirect
     
     installer_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'installer', 'output')
-    installer_name = 'SpectraMatch_Setup_2.2.3.exe'
+    installer_name = 'SpectraMatch_Setup_3.0.0.exe'
     installer_path = os.path.join(installer_dir, installer_name)
     
     # 1. Serve local file if it exists (always freshest build)
@@ -182,9 +182,71 @@ def download_desktop_installer():
     # 2. Redirect to env-var URL or default GitHub Release
     release_url = os.environ.get(
         'DESKTOP_INSTALLER_URL',
-        'https://github.com/algamel98/SPECTRAMATCHPAU/releases/download/v2.2.3/SpectraMatch_Setup_2.2.3.exe'
+        'https://github.com/algamel98/SPECTRAMATCHPAU/releases/download/v3.0.0/SpectraMatch_Setup_3.0.0.exe'
     )
     return redirect(release_url)
+
+@app.route('/api/alignment/modes', methods=['GET'])
+def alignment_modes():
+    """Return available alignment mode metadata."""
+    from modules.ImageAlignmentBackend import list_modes
+    return jsonify({'modes': list_modes()})
+
+
+@app.route('/api/alignment/preview', methods=['POST'])
+def alignment_preview():
+    """
+    Test an alignment technique on uploaded images and return preview data.
+    Does NOT save or affect analysis — purely for interactive testing.
+    """
+    ref_file = request.files.get('ref_image')
+    sample_file = request.files.get('sample_image')
+    mode = request.form.get('mode', 'direct')
+    region_json = request.form.get('region_data', '{}')
+
+    if not ref_file or not sample_file:
+        return jsonify({'error': 'Both images are required'}), 400
+
+    try:
+        import cv2
+        import numpy as np
+        from modules.ImageAlignmentBackend import apply_alignment, generate_preview_images
+
+        region_data = json.loads(region_json)
+
+        ref_bytes = ref_file.read()
+        ref_arr = np.frombuffer(ref_bytes, np.uint8)
+        ref_img = cv2.imdecode(ref_arr, cv2.IMREAD_COLOR)
+
+        sample_bytes = sample_file.read()
+        sample_arr = np.frombuffer(sample_bytes, np.uint8)
+        sample_img = cv2.imdecode(sample_arr, cv2.IMREAD_COLOR)
+
+        if ref_img is None or sample_img is None:
+            return jsonify({'error': 'Invalid image format'}), 400
+
+        # Apply region crop if provided
+        ref_proc = crop_image(ref_img, region_data) if region_data and region_data.get('type') != 'full' and region_data.get('use_crop') else ref_img
+        sam_proc = crop_image(sample_img, region_data) if region_data and region_data.get('type') != 'full' and region_data.get('use_crop') else sample_img
+
+        # Run alignment
+        result = apply_alignment(ref_proc, sam_proc, mode=mode, region_data=region_data)
+
+        # Generate preview images (base64)
+        previews = generate_preview_images(ref_proc, sam_proc, result)
+
+        return jsonify({
+            'success': True,
+            'mode': mode,
+            'metrics': _sanitize_for_json(result.get('metrics', {})),
+            'previews': previews,
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze():
@@ -287,6 +349,27 @@ def analyze():
         if not single_image_mode:
             ref_img_proc = crop_image(ref_img, region_data)
         
+        # ── Image Alignment Preprocessing (v3.0.0) ──
+        alignment_mode = settings.get('alignment_mode', 'direct')
+        alignment_metrics = {'applied': False, 'method': 'direct'}
+        if not single_image_mode and alignment_mode != 'direct':
+            try:
+                from modules.ImageAlignmentBackend import apply_alignment
+                align_result = apply_alignment(ref_img_proc, sample_img_proc,
+                                               mode=alignment_mode,
+                                               region_data=region_data)
+                if align_result['metrics'].get('applied', False):
+                    sample_img_proc = align_result['aligned_sample']
+                    alignment_metrics = align_result['metrics']
+                    print(f"Alignment applied: {alignment_mode} — {alignment_metrics.get('description', '')}")
+                else:
+                    print(f"Alignment not applied ({alignment_mode}): {alignment_metrics.get('reason', 'N/A')}")
+                    alignment_metrics = align_result['metrics']
+            except Exception as e:
+                print(f"Alignment preprocessing error: {e}")
+                import traceback
+                traceback.print_exc()
+
         # Paths for temp PDFs
         session_id = str(uuid.uuid4())
         temp_dir = UPLOAD_FOLDER
@@ -333,7 +416,7 @@ def analyze():
             SettingsReceipt.generate_receipt(
                 receipt_pdf, settings, processed_imgs_for_receipt,
                 analysis_id, op_name, date_str, time_str,
-                mode="single", software_version="2.2.3"
+                mode="single", software_version="3.0.0"
             )
             
             # Return JSON response with download URLs (consistent with two-image mode)
@@ -423,7 +506,7 @@ def analyze():
             else:
                 color_score = de_score
                 c_status = color_results.get('overall_status', 'FAIL')
-                color_method_label = '\u0394E2000'
+                color_method_label = 'DeltaEP2000%'
             
             # === Pattern Score Calculation ===
             pattern_scoring_method = settings.get('pattern_scoring_method', 'all')
@@ -483,7 +566,7 @@ def analyze():
                 pattern_score=pattern_score,
                 overall_score=overall_score,
                 decision=decision,
-                software_version="2.2.3" 
+                software_version="3.0.0" 
             )
                 
             print(f"Analysis Complete: Color={color_score:.1f}, Pattern={pattern_score:.1f}, Decision={decision}")
@@ -737,6 +820,8 @@ def analyze():
                 'pattern_conclusion_text': pattern_conclusion_text,
                 'pattern_conclusion_status': pattern_conclusion_status,
                 'color_averages': color_averages,
+                'alignment_mode': alignment_mode,
+                'alignment_metrics': alignment_metrics,
                 'fn_full': f"{analysis_id}{_lang_suffix}.pdf",
                 'fn_color': f"{analysis_id}R{_lang_suffix}.pdf",
                 'fn_pattern': f"{analysis_id}D{_lang_suffix}.pdf",

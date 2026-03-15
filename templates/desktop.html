@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>SpectraMatch Desktop</title>
     <link rel="stylesheet" href="/static/desktop/desktop.css">
+    <link rel="stylesheet" href="/static/css/alignment-studio.css">
     <link rel="icon" type="image/png" href="/static/images/deslogo.png">
 </head>
 <body data-theme="dark">
@@ -323,6 +324,29 @@
                                 <option value="tr">Türkçe</option>
                             </select>
                         </div>
+                        <div class="prop-separator"></div>
+                        <div class="prop-row">
+                            <label data-i18n="desktop.alignment.mode">Alignment Mode</label>
+                            <select id="propAlignmentMode">
+                                <option value="direct" selected>Direct Pixel</option>
+                                <option value="orb_homography">Feature-Based</option>
+                                <option value="ecc_alignment">ECC Intensity</option>
+                                <option value="phase_correlation">Phase Correlation</option>
+                                <option value="ai_smart_match">AI Smart Match</option>
+                                <option value="cascading_ecc">Cascading ECC</option>
+                                <option value="orb_affine">ORB Affine</option>
+                                <option value="subpixel_translation">Subpixel Translation</option>
+                                <option value="pyramid_align">Pyramid Coarse-Fine</option>
+                                <option value="tile_refine">Tile Refinement</option>
+                            </select>
+                        </div>
+                        <div class="prop-row">
+                            <label data-i18n="desktop.alignment.studio">Alignment Studio</label>
+                            <button class="prop-btn-studio" id="propBtnAlignmentStudio" onclick="Desktop.openAlignmentStudio()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+                                <span data-i18n="desktop.open.studio">Open Alignment Studio</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -333,7 +357,7 @@
                         <span data-i18n="prop.color.unit">Color Unit</span>
                     </div>
                     <div class="prop-section-body">
-                        <div class="prop-row"><label data-i18n="prop.scoring.basis">Scoring Basis</label><select id="propColorScoringMethod"><option value="delta_e" selected>Delta E 2000</option><option value="csi">CSI</option><option value="csi2000">CSI2000</option></select></div>
+                        <div class="prop-row"><label data-i18n="prop.scoring.basis">Scoring Basis</label><select id="propColorScoringMethod"><option value="delta_e" selected>DeltaEP2000%</option><option value="csi">CSI</option><option value="csi2000">CSI2000</option></select></div>
                         <div class="prop-separator"></div>
                         <div class="prop-row"><label data-i18n="prop.pass.thresh">Pass Threshold</label><input type="number" id="propColorPass" value="2.0" step="0.1" min="0.1" max="20.0"></div>
                         <div class="prop-row"><label data-i18n="prop.cond.thresh">Conditional</label><input type="number" id="propColorCond" value="5.0" step="0.1" min="0.1" max="20.0"></div>
@@ -528,7 +552,7 @@
             <span class="sb-sep">|</span>
             <span id="sbImages">Images: 0/2</span>
             <span class="sb-sep">|</span>
-            <span>v2.2.3</span>
+            <span>v3.0.0</span>
         </div>
     </div>
 
@@ -588,7 +612,7 @@
             </div>
             <div class="about-content">
                 <div class="about-app-name">SpectraMatch Desktop</div>
-                <div class="about-version-badge">v2.2.3</div>
+                <div class="about-version-badge">v3.0.0</div>
                 <div class="about-tagline" id="aboutTagline">Professional Textile Color &amp; Pattern Quality Control</div>
                 <div class="about-separator"></div>
                 <div class="about-description" id="aboutDesc">
@@ -796,7 +820,7 @@
             </div>
             <div class="dialog-body">
                 <div style="margin-bottom:12px">
-                    <strong>v2.2.3</strong> <span style="opacity:0.6">(2026)</span>
+                    <strong>v3.0.0</strong> <span style="opacity:0.6">(2026)</span>
                 </div>
                 <ul style="margin:0 0 12px 18px;line-height:1.8;font-size:13px;">
                     <li data-i18n="rn.item1">Full Turkish language support for all UI elements</li>
@@ -824,7 +848,7 @@
             <div class="dialog-body" style="text-align:center;padding:24px;">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.5;margin-bottom:12px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 <div style="font-size:15px;font-weight:600;margin-bottom:6px" data-i18n="updates.current">You are up to date!</div>
-                <div style="font-size:13px;opacity:0.7">SpectraMatch Desktop v2.2.3</div>
+                <div style="font-size:13px;opacity:0.7">SpectraMatch Desktop v3.0.0</div>
             </div>
         </div>
     </div>
@@ -857,6 +881,7 @@
         </div>
     </div>
 
+    <script src="/static/js/alignment-studio.js"></script>
     <script src="/static/desktop/desktop.js"></script>
 </body>
 </html>
