@@ -107,6 +107,7 @@ var T={en:{
 'rn.item1':'Full Turkish language support for all UI elements','rn.item2':'Complete toolbar with all analysis and help options','rn.item3':'Freehand (Pen) region selection tool','rn.item4':'Ready-to-Test built-in sample images','rn.item5':'Session persistence and state restoration','rn.item6':'Native Save-As dialog for PDF reports','rn.item7':'Manual and random sampling point selection','rn.item8':'GLCM texture and Fourier frequency analysis','rn.item9':'Comprehensive PDF reports with visualizations','rn.item10':'Panel resize and layout customization',
 'tb.title.open.ref':'Open Reference Image (Ctrl+O)','tb.title.open.sample':'Open Sample Image (Ctrl+Shift+O)','tb.title.run':'Run Analysis (F5)','tb.title.delete':'Delete Images (Ctrl+D)','tb.title.full.image':'Process entire image','tb.title.single.mode':'Single image analysis mode','tb.title.ready.test':'Ready-to-Test Images','tb.title.datasheet':'Technical Datasheet','tb.title.feedback':'Send Feedback','tb.title.thesis.test':'Test for Thesis','tb.title.reset':'Reset to Default','tb.title.lang.switch':'Switch language','tb.title.theme':'Toggle theme','tb.title.hide.panel':'Hide panel','tb.title.clear.console':'Clear console',
 'desktop.alignment.mode':'Alignment Mode','desktop.alignment.studio':'Alignment Studio','desktop.open.studio':'Open Studio',
+'thesis.delete.title':'Delete Thesis Database','thesis.delete.msg':'Are you sure you want to delete the entire thesis test database?','thesis.delete.confirm':'Confirm','thesis.delete.success':'Thesis database deleted successfully','thesis.delete.error':'Failed to delete thesis database',
 'rpt.report.summary':'Report Summary','rpt.color.analysis':'Color Analysis Details','rpt.pattern.analysis':'Pattern Analysis Details',
 'rpt.texture.frequency':'Texture & Frequency Analysis','rpt.single.image.analysis':'Single Image Analysis',
 'rpt.color.scoring.label':'Color Scoring','rpt.pattern.scoring.label':'Pattern Scoring',
@@ -233,6 +234,7 @@ var T={en:{
 'rn.item1':'Tüm arayüz öğeleri için tam Türkçe dil desteği','rn.item2':'Tüm analiz ve yardım seçenekleriyle eksiksiz araç çubuğu','rn.item3':'Serbest çizim (Kalem) bölge seçim aracı','rn.item4':'Teste hazır yerleşik örnek görüntüler','rn.item5':'Oturum kalıcılığı ve durum geri yükleme','rn.item6':'PDF raporları için yerel Farklı Kaydet diyaloğu','rn.item7':'Manuel ve rastgele örnekleme noktası seçimi','rn.item8':'GLCM doku ve Fourier frekans analizi','rn.item9':'Görselleştirmelerle kapsamlı PDF raporları','rn.item10':'Panel yeniden boyutlandırma ve düzen özelleştirme',
 'tb.title.open.ref':'Referans Görüntü Aç (Ctrl+O)','tb.title.open.sample':'Örnek Görüntü Aç (Ctrl+Shift+O)','tb.title.run':'Analizi Çalıştır (F5)','tb.title.delete':'Görüntüleri Sil (Ctrl+D)','tb.title.full.image':'Tüm görüntüyü işle','tb.title.single.mode':'Tek görüntü analiz modu','tb.title.ready.test':'Teste Hazır Görüntüler','tb.title.datasheet':'Teknik Veri Sayfası','tb.title.feedback':'Geri Bildirim Gönder','tb.title.thesis.test':'Tez Testi','tb.title.reset':'Varsayılana Sıfırla','tb.title.lang.switch':'Dil değiştir','tb.title.theme':'Tema değiştir','tb.title.hide.panel':'Paneli gizle','tb.title.clear.console':'Konsolu temizle',
 'desktop.alignment.mode':'Alignment Mode','desktop.alignment.studio':'Alignment Studio','desktop.open.studio':'Open Studio',
+'thesis.delete.title':'Tez Veritabanını Sil','thesis.delete.msg':'Tüm tez test veritabanını silmek istediğinizden emin misiniz?','thesis.delete.confirm':'Onayla','thesis.delete.success':'Tez veritabanı başarıyla silindi','thesis.delete.error':'Tez veritabanı silinemedi',
 'rpt.report.summary':'Rapor Özeti','rpt.color.analysis':'Renk Analizi Detayları','rpt.pattern.analysis':'Desen Analizi Detayları',
 'rpt.texture.frequency':'Doku ve Frekans Analizi','rpt.single.image.analysis':'Tek Görüntü Analizi',
 'rpt.color.scoring.label':'Renk Puanlama','rpt.pattern.scoring.label':'Desen Puanlama',
@@ -468,6 +470,10 @@ function initToolbar(){
     $('tbDatasheet').addEventListener('click',function(){$('datasheetDialog').style.display='';});
     $('tbFeedback').addEventListener('click',function(){$('feedbackDialog').style.display='';});
     $('tbThesisTest').addEventListener('click',runThesisTest);
+    $('tbThesisTest').addEventListener('contextmenu',function(e){
+        e.preventDefault();
+        confirmDeleteThesisDatabase();
+    });
 
     $('tbSingleMode').addEventListener('change',function(){
         State.singleMode=this.checked;
@@ -2284,6 +2290,78 @@ document.addEventListener('change',function(e){
 });
 
 /* ═══ Thesis Test Automation ═══ */
+function confirmDeleteThesisDatabase(){
+    if(!window.pywebview||!window.pywebview.api){
+        showAlert('Error','Desktop API not available','⚠️');
+        return;
+    }
+    var msg=t('thesis.delete.msg');
+    var title=t('thesis.delete.title');
+    var confirmText=t('thesis.delete.confirm');
+    var cancelText=t('btn.cancel');
+    
+    var overlay=document.createElement('div');
+    overlay.className='modal-overlay';
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:10000;display:flex;align-items:center;justify-content:center;';
+    
+    var dialog=document.createElement('div');
+    dialog.style.cssText='background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;padding:24px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.6);';
+    
+    var titleEl=document.createElement('h3');
+    titleEl.textContent=title;
+    titleEl.style.cssText='font-size:15px;font-weight:600;color:var(--text);margin:0 0 12px 0;';
+    
+    var msgEl=document.createElement('p');
+    msgEl.textContent=msg;
+    msgEl.style.cssText='font-size:13px;color:var(--text-dim);margin:0 0 20px 0;line-height:1.5;';
+    
+    var btnRow=document.createElement('div');
+    btnRow.style.cssText='display:flex;gap:10px;justify-content:flex-end;';
+    
+    var cancelBtn=document.createElement('button');
+    cancelBtn.textContent=cancelText;
+    cancelBtn.style.cssText='padding:6px 16px;border-radius:3px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;';
+    cancelBtn.addEventListener('click',function(){document.body.removeChild(overlay);});
+    
+    var confirmBtn=document.createElement('button');
+    confirmBtn.textContent=confirmText;
+    confirmBtn.style.cssText='padding:6px 16px;border-radius:3px;border:1px solid var(--error);background:var(--error);color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;';
+    confirmBtn.addEventListener('click',function(){
+        document.body.removeChild(overlay);
+        deleteThesisDatabase();
+    });
+    
+    btnRow.appendChild(cancelBtn);
+    btnRow.appendChild(confirmBtn);
+    dialog.appendChild(titleEl);
+    dialog.appendChild(msgEl);
+    dialog.appendChild(btnRow);
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+}
+
+function deleteThesisDatabase(){
+    if(!window.pywebview||!window.pywebview.api){
+        showAlert('Error','Desktop API not available','⚠️');
+        return;
+    }
+    log('Deleting thesis database...','warn');
+    window.pywebview.api.delete_thesis_database()
+        .then(function(result){
+            if(result.success){
+                log(t('thesis.delete.success'),'success');
+                showAlert('Success',t('thesis.delete.success'),'✓');
+            }else{
+                log(t('thesis.delete.error')+': '+result.error,'error');
+                showAlert('Error',result.error,'❌');
+            }
+        })
+        .catch(function(err){
+            log('ERROR: '+err.message,'error');
+            showAlert('Error',err.message,'❌');
+        });
+}
+
 function runThesisTest(){
     if(!window.pywebview||!window.pywebview.api){
         showAlert('Error','Desktop API not available','⚠️');

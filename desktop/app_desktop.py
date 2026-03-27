@@ -127,6 +127,37 @@ class Api:
                 'success': False,
                 'error': f'Failed to run thesis tests: {str(e)}'
             }
+    
+    def delete_thesis_database(self):
+        """Delete the entire thesis folder and all its contents.
+        
+        Returns:
+            dict: Result with success status and message
+        """
+        try:
+            import shutil
+            desktop_dir = os.path.dirname(os.path.abspath(__file__))
+            project_dir = os.path.dirname(desktop_dir)
+            thesis_dir = os.path.join(project_dir, 'thesis')
+            
+            if os.path.exists(thesis_dir):
+                shutil.rmtree(thesis_dir)
+                return {
+                    'success': True,
+                    'message': 'Thesis database deleted successfully'
+                }
+            else:
+                return {
+                    'success': True,
+                    'message': 'Thesis database folder does not exist'
+                }
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return {
+                'success': False,
+                'error': f'Failed to delete thesis database: {str(e)}'
+            }
 
 
 def find_free_port(start=5199):
