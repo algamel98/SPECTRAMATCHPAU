@@ -281,7 +281,7 @@ BESTCH addresses a different challenge: for repetitive textile patterns such as 
   \label{fig:align_bestch}
 \end{figure}
 
-The selected method is applied automatically during preprocessing, before any metric is computed. The Alignment Studio, accessible from the General settings section, allows interactive preview and comparison of all three methods on the loaded images before committing to a selection.
+The selected method is applied automatically during preprocessing, before any metric is computed. SPACTRA Studio, accessible from the General settings section, allows interactive preview and comparison of all three methods on the loaded images before committing to a selection.
 
 \subsection{Color}
 \begin{itemize}[leftmargin=1.5em]

@@ -650,7 +650,7 @@ def apply_alignment(ref_img, sample_img, mode='direct', region_data=None, **kwar
 
 def generate_preview_images(ref_img, sample_img, result):
     """
-    Generate visualization images for the alignment studio preview.
+    Generate visualization images for the SPACTRA Studio preview.
     Returns the aligned image in base64 format.
     For BESTCH, also returns the cropped reference image.
     """
@@ -661,11 +661,15 @@ def generate_preview_images(ref_img, sample_img, result):
 
     ali_bgr = aligned[:, :, :3] if aligned.shape[2] >= 3 else aligned
 
-    # For BESTCH, images may be cropped to different size
+    # Always include the reference image (already cropped by caller when region is active)
+    ref_bgr = ref_img[:, :, :3] if ref_img.shape[2] >= 3 else ref_img
+    previews['ref_source'] = _img_to_base64(ref_bgr)
+
+    # For BESTCH, images may be further cropped by the algorithm itself
     if result.get('method') == 'bestch' and result.get('ref_cropped') is not None:
         ref_cropped = result['ref_cropped']
-        ref_bgr = ref_cropped[:, :, :3] if ref_cropped.shape[2] >= 3 else ref_cropped
-        previews['ref_cropped'] = _img_to_base64(ref_bgr)
+        rc_bgr = ref_cropped[:, :, :3] if ref_cropped.shape[2] >= 3 else ref_cropped
+        previews['ref_cropped'] = _img_to_base64(rc_bgr)
         previews['aligned'] = _img_to_base64(ali_bgr)
     else:
         h, w = ref_img.shape[:2]

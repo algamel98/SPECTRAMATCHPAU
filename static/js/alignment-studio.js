@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Alignment Studio — SpectraMatch v3.0.0
+// SPACTRA Studio — SpectraMatch v3.0.0
 // Interactive Image Alignment & Registration Testing Window
 // ═══════════════════════════════════════════════════════════════════
 
@@ -74,6 +74,10 @@ var AlignmentStudio = (function () {
         return fallback;
     }
 
+    function _formatTechId(id) {
+        return id.replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // Build Modal DOM
     // ═══════════════════════════════════════════════════════════════
@@ -100,7 +104,7 @@ var AlignmentStudio = (function () {
                 '<div class="as-technique-card-header">' +
                     '<div class="as-technique-icon ' + tech.category + '">' + ICONS[tech.icon] + '</div>' +
                     '<div class="as-technique-info">' +
-                        '<div class="as-technique-name" data-i18n="align.name.' + tech.id + '">' + t('align.name.' + tech.id, tech.id) + '</div>' +
+                        '<div class="as-technique-name" data-i18n="align.name.' + tech.id + '">' + t('align.name.' + tech.id, _formatTechId(tech.id)) + '</div>' +
                         '<div class="as-technique-status" id="asStatus_' + tech.id + '"></div>' +
                     '</div>' +
                 '</div>' +
@@ -110,9 +114,6 @@ var AlignmentStudio = (function () {
                     '<button class="as-btn as-btn-test" data-action="test" data-technique="' + tech.id + '">' +
                         ICONS.play + '<span>' + t('align.test', 'Test') + '</span>' +
                     '</button>' +
-                    '<button class="as-btn as-btn-save" data-action="save" data-technique="' + tech.id + '">' +
-                        ICONS.check + '<span>' + t('align.apply', 'Apply') + '</span>' +
-                    '</button>' +
                 '</div>' +
             '</div>';
         }).join('');
@@ -121,7 +122,7 @@ var AlignmentStudio = (function () {
             '<div class="as-header">' +
                 '<div class="as-header-icon">' + ICONS.sliders + '</div>' +
                 '<div class="as-header-text">' +
-                    '<h2 data-i18n="align.studio.title">' + t('align.studio.title', 'Image Alignment Studio') + '</h2>' +
+                    '<h2 data-i18n="align.studio.title">' + t('align.studio.title', 'SPACTRA Studio') + '</h2>' +
                     '<small data-i18n="align.studio.subtitle">' + t('align.studio.subtitle', 'Test and compare alignment techniques interactively') + '</small>' +
                 '</div>' +
                 '<div class="as-header-spacer"></div>' +
@@ -158,7 +159,7 @@ var AlignmentStudio = (function () {
             '</div>' +
             '<div class="as-footer">' +
                 '<div class="as-footer-info">' + ICONS.info +
-                    '<span>' + t('align.footer.note', 'Testing does not save settings. Use Save to confirm your choice.') + '</span>' +
+                    '<span>' + t('align.footer.note', 'Click a technique to auto-test it. Use Apply & Close to confirm your choice.') + '</span>' +
                 '</div>' +
                 '<div class="as-footer-spacer"></div>' +
                 '<button class="as-btn-footer as-btn-calibration" id="asCalibrationBtn">' +
@@ -221,14 +222,11 @@ var AlignmentStudio = (function () {
             });
         });
 
-        // Test / Save buttons
+        // Test buttons
         overlay.querySelectorAll('.as-btn[data-action]').forEach(function (btn) {
             btn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                var action = btn.dataset.action;
-                var techId = btn.dataset.technique;
-                if (action === 'test') _testTechnique(techId);
-                else if (action === 'save') _saveTechnique(techId);
+                if (btn.dataset.action === 'test') _testTechnique(btn.dataset.technique);
             });
         });
 
@@ -421,17 +419,6 @@ var AlignmentStudio = (function () {
         _highlightSaved();
         _updateSavedIndicator();
 
-        // Animate the save button
-        var saveBtn = document.querySelector('.as-btn-save[data-technique="' + techId + '"]');
-        if (saveBtn) {
-            saveBtn.classList.add('saved-flash');
-            saveBtn.innerHTML = ICONS.check + '<span>Saved!</span>';
-            setTimeout(function () {
-                saveBtn.classList.remove('saved-flash');
-                saveBtn.innerHTML = ICONS.save + '<span>Save</span>';
-            }, 1500);
-        }
-
         _showToast(t('align.applied', 'Technique saved: ') + _getTechName(techId), 'success');
     }
 
@@ -454,9 +441,6 @@ var AlignmentStudio = (function () {
         if (!overlay) return;
         overlay.querySelectorAll('.as-technique-card').forEach(function (card) {
             card.classList.toggle('saved', card.dataset.technique === state.savedTechnique);
-        });
-        overlay.querySelectorAll('.as-btn-save').forEach(function (btn) {
-            btn.classList.toggle('is-saved', btn.dataset.technique === state.savedTechnique);
         });
     }
 
@@ -513,20 +497,80 @@ var AlignmentStudio = (function () {
 
     function _showSourceImages() {
         if (!state.refImageSrc || !state.sampleImageSrc) return;
+        var rd = state.regionData;
+        if (rd && rd.use_crop && rd.type && rd.type !== 'full' && rd.width > 0 && rd.height > 0) {
+            _showCroppedSourceImages(rd);
+            return;
+        }
+        _renderSourcePanesHTML(state.refImageSrc, state.sampleImageSrc,
+            t('align.reference', 'Reference'), t('align.sample', 'Sample'));
+    }
+
+    function _showCroppedSourceImages(rd) {
+        var area = document.getElementById('asPreviewArea');
+        var empty = document.getElementById('asPreviewEmpty');
+        if (empty) empty.style.display = 'none';
+        var proc = document.getElementById('asProcessingOverlay');
+        if (proc) proc.classList.add('visible');
+
+        var pending = 2;
+        var refSrc = state.refImageSrc;
+        var samSrc = state.sampleImageSrc;
+
+        function done() {
+            pending--;
+            if (pending > 0) return;
+            if (proc) proc.classList.remove('visible');
+            _renderSourcePanesHTML(refSrc, samSrc,
+                t('align.reference', 'Reference'), t('align.sample', 'Sample'));
+        }
+        _canvasCrop(state.refImageSrc, rd, function (s) { refSrc = s || state.refImageSrc; done(); });
+        _canvasCrop(state.sampleImageSrc, rd, function (s) { samSrc = s || state.sampleImageSrc; done(); });
+    }
+
+    function _renderSourcePanesHTML(refSrc, samSrc, refLabel, samLabel) {
         var area = document.getElementById('asPreviewArea');
         var empty = document.getElementById('asPreviewEmpty');
         if (empty) empty.style.display = 'none';
         area.innerHTML = _keepProcessingOverlay() +
             '<div class="as-preview-images as-fade-in">' +
                 '<div class="as-preview-pane">' +
-                    '<span class="as-preview-label ref">' + t('align.reference', 'Reference') + '</span>' +
-                    '<div class="as-preview-img-wrap"><img src="' + state.refImageSrc + '" alt="Reference"></div>' +
+                    '<span class="as-preview-label ref">' + refLabel + '</span>' +
+                    '<div class="as-preview-img-wrap"><img src="' + refSrc + '" alt="Reference"></div>' +
                 '</div>' +
                 '<div class="as-preview-pane">' +
-                    '<span class="as-preview-label sample">' + t('align.sample', 'Sample') + '</span>' +
-                    '<div class="as-preview-img-wrap"><img src="' + state.sampleImageSrc + '" alt="Sample"></div>' +
+                    '<span class="as-preview-label sample">' + samLabel + '</span>' +
+                    '<div class="as-preview-img-wrap"><img src="' + samSrc + '" alt="Sample"></div>' +
                 '</div>' +
             '</div>';
+    }
+
+    function _canvasCrop(src, rd, callback) {
+        if (!src || typeof document === 'undefined') { callback(null); return; }
+        var img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function () {
+            try {
+                var x = Math.max(0, Math.round(rd.x || 0));
+                var y = Math.max(0, Math.round(rd.y || 0));
+                var w = Math.min(Math.round(rd.width || img.naturalWidth), img.naturalWidth - x);
+                var h = Math.min(Math.round(rd.height || img.naturalHeight), img.naturalHeight - y);
+                if (w <= 0 || h <= 0) { callback(null); return; }
+                var canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+                var ctx = canvas.getContext('2d');
+                if (rd.type === 'circle') {
+                    ctx.beginPath();
+                    ctx.arc(w / 2, h / 2, Math.min(w, h) / 2, 0, Math.PI * 2);
+                    ctx.clip();
+                }
+                ctx.drawImage(img, -x, -y);
+                callback(canvas.toDataURL('image/png'));
+            } catch (e) { callback(null); }
+        };
+        img.onerror = function () { callback(null); };
+        img.src = src;
     }
 
     function _renderPreviewAnimated() {
@@ -544,8 +588,8 @@ var AlignmentStudio = (function () {
         // Build transform indicator overlay
         var indicatorHTML = _buildTransformIndicator(m);
 
-        // For BESTCH, show cropped ref instead of original ref
-        var refSrc = (state.refImageSrc || '');
+        // Use backend-returned reference if available (handles both region crop and BESTCH crop)
+        var refSrc = p.ref_source ? 'data:image/png;base64,' + p.ref_source : (state.refImageSrc || '');
         var refLabel = t('align.reference', 'Reference');
         var alignedLabel = t('align.aligned', 'Aligned Sample');
         if (p.ref_cropped) {
@@ -633,7 +677,7 @@ var AlignmentStudio = (function () {
             parts.push('<div class="as-metric-sep"></div>');
             parts.push('<div class="as-metric"><span class="as-metric-label">' + t('align.matches', 'Matches') + '</span><span class="as-metric-value">' + m.good_matches + '</span></div>');
         }
-        if (m.similarity !== undefined) {
+        if (m.similarity !== undefined && m.similarity < 100) {
             parts.push('<div class="as-metric-sep"></div>');
             var simClass = m.similarity > 70 ? 'good' : (m.similarity > 40 ? 'warn' : 'bad');
             parts.push('<div class="as-metric"><span class="as-metric-label">' + t('align.bestch.similarity', 'Similarity') + '</span><span class="as-metric-value ' + simClass + '">' + m.similarity + '%</span></div>');
@@ -686,7 +730,7 @@ var AlignmentStudio = (function () {
         fetch(src).then(function (r) { return r.blob(); }).then(callback).catch(function () { callback(new Blob()); });
     }
 
-    function _getTechName(techId) { return t('align.name.' + techId, techId); }
+    function _getTechName(techId) { return t('align.name.' + techId, _formatTechId(techId)); }
 
     function _showToast(msg, type) {
         if (typeof showToast === 'function') { showToast(msg, type); }
@@ -858,7 +902,7 @@ var AlignmentStudio = (function () {
 
             var tech = techQueue[idx];
             var pct = Math.round(((idx) / total) * 100);
-            processingStep.textContent = (idx + 1) + '/' + total + ' — ' + t('align.name.' + tech.id, tech.id);
+            processingStep.textContent = (idx + 1) + '/' + total + ' — ' + t('align.name.' + tech.id, _formatTechId(tech.id));
             processingBar.style.width = pct + '%';
 
             _desktopLog('Calibrating [' + (idx + 1) + '/' + total + ']: ' + tech.id, 'info');

@@ -2381,7 +2381,7 @@ select option {
     stroke: var(--error, #f44747);
 }
 
-/* Alignment Studio quick-launch button in toolbar */
+/* SPACTRA Studio quick-launch button in toolbar */
 .tb-studio-btn {
     color: var(--accent) !important;
     border: 1px solid var(--accent) !important;

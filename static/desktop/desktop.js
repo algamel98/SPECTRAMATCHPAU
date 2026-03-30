@@ -106,7 +106,7 @@ var T={en:{
 'updates.current':'You are up to date!',
 'rn.item1':'Full Turkish language support for all UI elements','rn.item2':'Complete toolbar with all analysis and help options','rn.item3':'Freehand (Pen) region selection tool','rn.item4':'Ready-to-Test built-in sample images','rn.item5':'Session persistence and state restoration','rn.item6':'Native Save-As dialog for PDF reports','rn.item7':'Manual and random sampling point selection','rn.item8':'GLCM texture and Fourier frequency analysis','rn.item9':'Comprehensive PDF reports with visualizations','rn.item10':'Panel resize and layout customization',
 'tb.title.open.ref':'Open Reference Image (Ctrl+O)','tb.title.open.sample':'Open Sample Image (Ctrl+Shift+O)','tb.title.run':'Run Analysis (F5)','tb.title.delete':'Delete Images (Ctrl+D)','tb.title.full.image':'Process entire image','tb.title.single.mode':'Single image analysis mode','tb.title.ready.test':'Ready-to-Test Images','tb.title.datasheet':'Technical Datasheet','tb.title.feedback':'Send Feedback','tb.title.thesis.test':'Test for Thesis','tb.title.reset':'Reset to Default','tb.title.lang.switch':'Switch language','tb.title.theme':'Toggle theme','tb.title.hide.panel':'Hide panel','tb.title.clear.console':'Clear console',
-'desktop.alignment.mode':'Alignment Mode','desktop.alignment.studio':'Alignment Studio','desktop.open.studio':'Open Studio',
+'desktop.alignment.mode':'Alignment Mode','desktop.alignment.studio':'SPACTRA Studio','desktop.open.studio':'Open Studio',
 'thesis.delete.title':'Delete Thesis Database','thesis.delete.msg':'Are you sure you want to delete the entire thesis test database?','thesis.delete.confirm':'Confirm','thesis.delete.success':'Thesis database deleted successfully','thesis.delete.error':'Failed to delete thesis database',
 'rpt.report.summary':'Report Summary','rpt.color.analysis':'Color Analysis Details','rpt.pattern.analysis':'Pattern Analysis Details',
 'rpt.texture.frequency':'Texture & Frequency Analysis','rpt.single.image.analysis':'Single Image Analysis',
@@ -158,10 +158,10 @@ var T={en:{
 'thesis.rtt.autoloaded':'Ready-to-Test Pair 1 loaded.',
 'thesis.rtt.starting':'Images loaded — starting thesis test...',
 'alignment.no.images.title':'Images Required',
-'alignment.no.images.msg':'Please load both a reference and sample image before opening Alignment Studio.',
+'alignment.no.images.msg':'Please load both a reference and sample image before opening SPACTRA Studio.',
 'tb.align.label':'Align:',
 'tb.title.align.mode':'Alignment Mode — select pre-processing method',
-'tb.title.open.studio':'Open Alignment Studio',
+'tb.title.open.studio':'Open SPACTRA Studio',
 'tb.title.sampling.count':'Sampling Count — number of color measurement points'
 },tr:{
 'menu.file':'Dosya','menu.open.ref':'Referans Görüntü Aç...','menu.open.sample':'Örnek Görüntü Aç...',
@@ -250,7 +250,7 @@ var T={en:{
 'updates.current':'Güncelsiniz!',
 'rn.item1':'Tüm arayüz öğeleri için tam Türkçe dil desteği','rn.item2':'Tüm analiz ve yardım seçenekleriyle eksiksiz araç çubuğu','rn.item3':'Serbest çizim (Kalem) bölge seçim aracı','rn.item4':'Teste hazır yerleşik örnek görüntüler','rn.item5':'Oturum kalıcılığı ve durum geri yükleme','rn.item6':'PDF raporları için yerel Farklı Kaydet diyaloğu','rn.item7':'Manuel ve rastgele örnekleme noktası seçimi','rn.item8':'GLCM doku ve Fourier frekans analizi','rn.item9':'Görselleştirmelerle kapsamlı PDF raporları','rn.item10':'Panel yeniden boyutlandırma ve düzen özelleştirme',
 'tb.title.open.ref':'Referans Görüntü Aç (Ctrl+O)','tb.title.open.sample':'Örnek Görüntü Aç (Ctrl+Shift+O)','tb.title.run':'Analizi Çalıştır (F5)','tb.title.delete':'Görüntüleri Sil (Ctrl+D)','tb.title.full.image':'Tüm görüntüyü işle','tb.title.single.mode':'Tek görüntü analiz modu','tb.title.ready.test':'Teste Hazır Görüntüler','tb.title.datasheet':'Teknik Veri Sayfası','tb.title.feedback':'Geri Bildirim Gönder','tb.title.thesis.test':'Tez Testi','tb.title.reset':'Varsayılana Sıfırla','tb.title.lang.switch':'Dil değiştir','tb.title.theme':'Tema değiştir','tb.title.hide.panel':'Paneli gizle','tb.title.clear.console':'Konsolu temizle',
-'desktop.alignment.mode':'Alignment Mode','desktop.alignment.studio':'Alignment Studio','desktop.open.studio':'Open Studio',
+'desktop.alignment.mode':'Hizalama Modu','desktop.alignment.studio':'SPACTRA Studio','desktop.open.studio':'Stüdyoyu Aç',
 'thesis.delete.title':'Tez Veritabanını Sil','thesis.delete.msg':'Tüm tez test veritabanını silmek istediğinizden emin misiniz?','thesis.delete.confirm':'Onayla','thesis.delete.success':'Tez veritabanı başarıyla silindi','thesis.delete.error':'Tez veritabanı silinemedi',
 'rpt.report.summary':'Rapor Özeti','rpt.color.analysis':'Renk Analizi Detayları','rpt.pattern.analysis':'Desen Analizi Detayları',
 'rpt.texture.frequency':'Doku ve Frekans Analizi','rpt.single.image.analysis':'Tek Görüntü Analizi',
@@ -302,10 +302,10 @@ var T={en:{
 'thesis.rtt.autoloaded':'Teste Hazır Çift 1 yüklendi.',
 'thesis.rtt.starting':'Görüntüler yüklendi — tez testi başlatılıyor...',
 'alignment.no.images.title':'Görüntü Gerekli',
-'alignment.no.images.msg':'Alignment Studio\'yu açmadan önce lütfen hem referans hem de örnek görüntü yükleyin.',
-'tb.align.label':'Hiz.:',
+'alignment.no.images.msg':'SPACTRA Studio\'yu açmadan önce lütfen hem referans hem de örnek görüntü yükleyin.',
+'tb.align.label':'Hizala:',
 'tb.title.align.mode':'Hizalama Modu — ön işlem yöntemini seçin',
-'tb.title.open.studio':'Alignment Studio\'yu Aç',
+'tb.title.open.studio':'SPACTRA Studio\'yu Aç',
 'tb.title.sampling.count':'Örnekleme Sayısı — renk ölçüm noktası sayısı'
 }};
 
@@ -2557,7 +2557,7 @@ function _showImageRequiredDialog(title, msg){
     okBtn.focus();
 }
 
-/* ═══ Alignment Studio (v3.0.0) ═══ */
+/* ═══ SPACTRA Studio (v3.0.0) ═══ */
 function openAlignmentStudio(){
     if(typeof AlignmentStudio==='undefined'){log('AlignmentStudio module not loaded','error');return;}
     if(!State.refFile||!State.sampleFile){
@@ -2579,7 +2579,7 @@ function runCalibration(){
         log('Starting calibration — testing all alignment techniques...','info');
         AlignmentStudio.runCalibration();
     } else {
-        log('AlignmentStudio module not loaded — open Alignment Studio first','error');
+        log('AlignmentStudio module not loaded — open SPACTRA Studio first','error');
     }
 }
 function downloadCalibrationReport(){
@@ -2587,7 +2587,7 @@ function downloadCalibrationReport(){
         log('Downloading calibration report...','info');
         AlignmentStudio.downloadCalibrationReport();
     } else {
-        log('AlignmentStudio module not loaded — open Alignment Studio first','error');
+        log('AlignmentStudio module not loaded — open SPACTRA Studio first','error');
     }
 }
 

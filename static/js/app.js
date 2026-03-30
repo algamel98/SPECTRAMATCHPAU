@@ -1,6 +1,6 @@
 /**
  * Textile QC System - Main Application
- * Version 3.0.0 - With Image Alignment Studio
+ * Version 3.0.0 - With SPACTRA Studio
  */
 
 // Application State
@@ -3100,7 +3100,7 @@ function resetSettings() {
 }
 
 
-// Alignment Studio (v3.0.0)
+// SPACTRA Studio (v3.0.0)
 
 function openAlignmentStudio() {
     if (typeof AlignmentStudio === 'undefined') {
@@ -3121,7 +3121,7 @@ function openAlignmentStudio() {
 
     // Get image sources from the current page
     var refImg = document.getElementById('refPreview') || document.getElementById('ref_image_preview');
-    var sampleImg = document.getElementById('samplePreview') || document.getElementById('sample_image_preview');
+    var sampleImg = document.getElementById('testPreview') || document.getElementById('samplePreview') || document.getElementById('sample_image_preview');
 
     var refSrc = null;
     var sampleSrc = null;
@@ -3138,13 +3138,33 @@ function openAlignmentStudio() {
     // Try to get file objects from AppState
     if (typeof AppState !== 'undefined') {
         refFile = AppState.refFile || null;
-        sampleFile = AppState.sampleFile || null;
+        sampleFile = AppState.sampleFile || AppState.testFile || null;
     }
 
-    // Get current region data
+    // Fallback: create object URLs from file objects when img src is unavailable
+    if (!refSrc && refFile) {
+        try { refSrc = URL.createObjectURL(refFile); } catch (e) {}
+    }
+    if (!sampleSrc && sampleFile) {
+        try { sampleSrc = URL.createObjectURL(sampleFile); } catch (e) {}
+    }
+
+    // Build region data — mirrors executeSequentialSteps() logic
     var regionData = null;
-    if (typeof RegionSelector !== 'undefined' && RegionSelector.getRegionData) {
-        regionData = RegionSelector.getRegionData();
+    if (typeof RegionSelector !== 'undefined' &&
+        typeof RegionSelector.isPlaced === 'function' && RegionSelector.isPlaced() &&
+        !AppState.processFullImage) {
+        var cropSettings = RegionSelector.getCropSettings();
+        if (cropSettings && cropSettings.use_crop) {
+            regionData = {
+                type: cropSettings.crop_shape === 'circle' ? 'circle' : 'rect',
+                x: cropSettings.crop_x,
+                y: cropSettings.crop_y,
+                width: cropSettings.crop_width,
+                height: cropSettings.crop_height,
+                use_crop: true
+            };
+        }
     }
 
     AlignmentStudio.open({

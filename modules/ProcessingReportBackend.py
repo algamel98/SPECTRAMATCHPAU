@@ -363,8 +363,8 @@ def _build_cover_page(ts, report_id, saved_technique, tested_techniques,
     elements.append(Paragraph(title, StyleReportTitle))
     elements.append(Spacer(1, 0.1 * inch))
 
-    subtitle = ('SpectraMatch Hizalama Stüdyosu Sonuçları' if is_tr
-                else 'SpectraMatch Alignment Studio Results')
+    subtitle = ('SpectraMatch SPACTRA Studio Sonuçları' if is_tr
+                else 'SpectraMatch SPACTRA Studio Results')
     elements.append(Paragraph(f"<i>{subtitle}</i>", StyleTechSubtitle))
     elements.append(Spacer(1, 0.3 * inch))
 

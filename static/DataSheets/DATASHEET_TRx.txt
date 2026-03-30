@@ -283,7 +283,7 @@ BESTCH farklı bir zorluğu ele alır: dokuma veya baskılı kumaşlar gibi tekr
   \label{fig:align_bestch}
 \end{figure}
 
-Seçilen yöntem, herhangi bir metrik hesaplanmadan önce ön işleme sırasında otomatik olarak uygulanır. Genel ayarlar bölümünden erişilebilen Hizalama Stüdyosu, bir seçime karar vermeden önce yüklenen görüntüler üzerinde üç yöntemin de etkileşimli önizlemesine ve karşılaştırılmasına olanak tanır.
+Seçilen yöntem, herhangi bir metrik hesaplanmadan önce ön işleme sırasında otomatik olarak uygulanır. Genel ayarlar bölümünden erişilebilen SPACTRA Studio, bir seçime karar vermeden önce yüklenen görüntüler üzerinde üç yöntemin de etkileşimli önizlemesine ve karşılaştırılmasına olanak tanır.
 
 \subsection{Renk}
 \begin{itemize}[leftmargin=1.5em]
