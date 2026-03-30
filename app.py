@@ -692,7 +692,14 @@ def analyze():
             def _safe_rgb(d):
                 r255 = d.get('rgb255', d.get('rgb', [0,0,0]))
                 return [int(min(255, max(0, round(float(v))))) for v in r255]
-            
+            def _safe_xyz(d):
+                return [round(float(v), 4) for v in d.get('xyz', [0,0,0])]
+            def _safe_cmyk(d):
+                cmyk = d.get('cmyk', [0,0,0,0])
+                return [round(float(v)*100, 2) for v in cmyk]
+            def _safe_rgb_std(d):
+                return [round(float(v), 4) for v in d.get('rgb_std', [0,0,0])]
+
             reg_stats_safe = []
             for rs in color_results.get('reg_stats', []):
                 ref_d = rs.get('ref', {})
@@ -700,6 +707,7 @@ def analyze():
                 reg_stats_safe.append({
                     'id': rs.get('id'),
                     'pos': [int(v) for v in rs.get('pos', (0,0))],
+                    'radius': int(ref_d.get('r', color_results.get('r', 0))),
                     'de76': round(float(rs.get('de76', 0)), 4),
                     'de94': round(float(rs.get('de94', 0)), 4),
                     'de00': round(float(rs.get('de00', 0)), 4),
@@ -708,11 +716,61 @@ def analyze():
                     'sam_lab': _safe_lab(sam_d),
                     'ref_rgb': _safe_rgb(ref_d),
                     'sam_rgb': _safe_rgb(sam_d),
+                    'ref_xyz': _safe_xyz(ref_d),
+                    'sam_xyz': _safe_xyz(sam_d),
+                    'ref_cmyk': _safe_cmyk(ref_d),
+                    'sam_cmyk': _safe_cmyk(sam_d),
+                    'ref_rgb_std': _safe_rgb_std(ref_d),
+                    'sam_rgb_std': _safe_rgb_std(sam_d),
                 })
+
+            # Lab* detailed analysis: ΔL*, Δa*, Δb*, magnitude, per-component thresholds
+            lab_analysis = {}
+            if reg_stats_safe:
+                import numpy as _np
+                lab_thr = settings.get('lab_thresholds', {})
+                thr_dl = float(lab_thr.get('dl', 1.0))
+                thr_da = float(lab_thr.get('da', 1.0))
+                thr_db = float(lab_thr.get('db', 1.0))
+                thr_mag = float(lab_thr.get('magnitude', 2.0))
+                mean_ref_L = float(_np.mean([r['ref_lab'][0] for r in reg_stats_safe]))
+                mean_ref_a = float(_np.mean([r['ref_lab'][1] for r in reg_stats_safe]))
+                mean_ref_b = float(_np.mean([r['ref_lab'][2] for r in reg_stats_safe]))
+                mean_sam_L = float(_np.mean([r['sam_lab'][0] for r in reg_stats_safe]))
+                mean_sam_a = float(_np.mean([r['sam_lab'][1] for r in reg_stats_safe]))
+                mean_sam_b = float(_np.mean([r['sam_lab'][2] for r in reg_stats_safe]))
+                import math as _math
+                dL = round(mean_sam_L - mean_ref_L, 4)
+                da = round(mean_sam_a - mean_ref_a, 4)
+                db = round(mean_sam_b - mean_ref_b, 4)
+                mag = round(_math.sqrt(dL**2 + da**2 + db**2), 4)
+                lab_analysis = {
+                    'mean_ref': {'L': round(mean_ref_L,4), 'a': round(mean_ref_a,4), 'b': round(mean_ref_b,4)},
+                    'mean_sam': {'L': round(mean_sam_L,4), 'a': round(mean_sam_a,4), 'b': round(mean_sam_b,4)},
+                    'delta_L': dL, 'delta_a': da, 'delta_b': db, 'magnitude': mag,
+                    'thresholds': {'dL': thr_dl, 'da': thr_da, 'db': thr_db, 'magnitude': thr_mag},
+                    'status': {
+                        'dL': 'PASS' if abs(dL) <= thr_dl else 'FAIL',
+                        'da': 'PASS' if abs(da) <= thr_da else 'FAIL',
+                        'db': 'PASS' if abs(db) <= thr_db else 'FAIL',
+                        'magnitude': 'PASS' if mag <= thr_mag else 'FAIL',
+                    },
+                }
             
             pattern_scores = {}
             for k, v in pattern_results.get('scores', {}).items():
                 pattern_scores[k] = round(float(v), 2)
+
+            # Pattern per-metric pass/fail details (mirrors what the PDF shows)
+            pat_thr_cfg = settings.get('thresholds', {})
+            _global_pat_thr = float(settings.get('global_pattern_threshold', settings.get('global_threshold', 75.0)))
+            pattern_details = {}
+            for _mk, _mv in pattern_scores.items():
+                _thr_entry = pat_thr_cfg.get(_mk, {})
+                _pass_t = float(_thr_entry.get('pass', _global_pat_thr)) if isinstance(_thr_entry, dict) else _global_pat_thr
+                _cond_t = float(_thr_entry.get('conditional', _global_pat_thr - 15)) if isinstance(_thr_entry, dict) else (_global_pat_thr - 15)
+                _st = 'PASS' if _mv >= _pass_t else ('CONDITIONAL' if _mv >= _cond_t else 'FAIL')
+                pattern_details[_mk] = {'score': _mv, 'pass_threshold': _pass_t, 'cond_threshold': _cond_t, 'status': _st}
             
             # Generate visualization images for frontend display
             viz_urls = _save_visualization_images(session_id, ref_img_proc, sample_img_proc, color_results, pattern_results, settings)
@@ -965,6 +1023,15 @@ def analyze():
                 'glcm_data': glcm_data,
                 'color_sampling_radius': int(color_results.get('r', 0)),
                 'color_sampling_points': color_sampling_points,
+                'color_sampling_count': len(color_sampling_points),
+                'lab_analysis': lab_analysis,
+                'pattern_details': pattern_details,
+                'image_dimensions': {
+                    'ref':    {'width': int(ref_img.shape[1]),  'height': int(ref_img.shape[0])},
+                    'sample': {'width': int(sample_img.shape[1]), 'height': int(sample_img.shape[0])},
+                    'processed_ref':    {'width': int(ref_img_proc.shape[1]),  'height': int(ref_img_proc.shape[0])},
+                    'processed_sample': {'width': int(sample_img_proc.shape[1]), 'height': int(sample_img_proc.shape[0])},
+                },
                 'fn_full': f"{analysis_id}{_lang_suffix}.pdf",
                 'fn_color': f"{analysis_id}R{_lang_suffix}.pdf",
                 'fn_pattern': f"{analysis_id}D{_lang_suffix}.pdf",

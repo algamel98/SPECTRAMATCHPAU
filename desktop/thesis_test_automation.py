@@ -311,27 +311,60 @@ def _build_data_json(result, mode, label, duration, ref_name, sample_name,
                      pdfs_saved, images_saved, settings=None, region_data=None):
     """Package the full /api/analyze response into a structured thesis data file.
 
-    Every field from the API response is captured.  Temporary URL fields are
-    omitted (the actual files are already saved to disk).  The raw_api_fields
-    section acts as a catch-all so that no data is ever silently dropped.
+    Mirrors the full PDF report content: all tables, per-point color data
+    (Lab, RGB, XYZ, CMYK), statistics, Lab* analysis, pattern details,
+    illuminant table, recommendations, settings, region info, and metadata.
+    URL-only fields are excluded (actual files are saved to disk).
+    raw_api_fields is a catch-all that captures anything not explicitly mapped.
     """
     _url_fields = {
         'pdf_url', 'receipt_url', 'color_report_url', 'pattern_report_url',
-        'images',    # image URLs — the actual PNG files are saved in Images/
+        'images',
+    }
+    _mapped = {
+        'success', 'session_id',
+        # scores
+        'color_score', 'pattern_score', 'overall_score', 'decision',
+        'color_status', 'pattern_status',
+        'color_scoring_method', 'color_method_label',
+        'pattern_scoring_method', 'pattern_method_label',
+        # color analysis
+        'mean_de00', 'csi_value',
+        'de_statistics', 'color_regions', 'color_averages', 'illuminant_data',
+        'color_sampling_radius', 'color_sampling_points', 'color_sampling_count',
+        'lab_analysis',
+        # pattern analysis
+        'pattern_composite', 'pattern_final_status', 'pattern_scores',
+        'structural_meta', 'pattern_details',
+        # fourier / glcm
+        'fourier_data', 'glcm_data',
+        # alignment
+        'alignment_mode', 'alignment_metrics',
+        # recommendations
+        'color_findings', 'color_conclusion_text', 'color_conclusion_status',
+        'pattern_findings', 'pattern_conclusion_text', 'pattern_conclusion_status',
+        # metadata
+        'report_id', 'report_date', 'report_time', 'operator',
+        'report_size', 'color_report_size', 'pattern_report_size',
+        'fn_full', 'fn_color', 'fn_pattern', 'fn_receipt',
+        'image_dimensions',
     }
 
     doc = {
+        # ── 1. Metadata ────────────────────────────────────────────────────
         'metadata': {
-            'alignment_mode'   : mode,
-            'alignment_label'  : label,
-            'report_id'        : result.get('report_id', ''),
-            'report_date'      : result.get('report_date', ''),
-            'report_time'      : result.get('report_time', ''),
-            'operator'         : result.get('operator', ''),
-            'duration_seconds' : round(duration, 2),
-            'images_used'      : {'reference': ref_name, 'sample': sample_name},
-            'pdfs_saved'       : pdfs_saved,
-            'images_saved'     : images_saved,
+            'alignment_mode'        : mode,
+            'alignment_label'       : label,
+            'report_id'             : result.get('report_id',   ''),
+            'report_date'           : result.get('report_date', ''),
+            'report_time'           : result.get('report_time', ''),
+            'operator'              : result.get('operator',    ''),
+            'software_version'      : '3.0.0',
+            'duration_seconds'      : round(duration, 2),
+            'images_used'           : {'reference': ref_name, 'sample': sample_name},
+            'image_dimensions'      : result.get('image_dimensions', {}),
+            'pdfs_saved'            : pdfs_saved,
+            'images_saved'          : images_saved,
             'pdf_filenames': {
                 'full'    : result.get('fn_full',    ''),
                 'color'   : result.get('fn_color',   ''),
@@ -345,6 +378,7 @@ def _build_data_json(result, mode, label, duration, ref_name, sample_name,
             },
         },
 
+        # ── 2. Overall Scores & Decision ───────────────────────────────────
         'scores': {
             'color_score'            : result.get('color_score',            0),
             'pattern_score'          : result.get('pattern_score',          0),
@@ -358,33 +392,51 @@ def _build_data_json(result, mode, label, duration, ref_name, sample_name,
             'pattern_method_label'   : result.get('pattern_method_label',   ''),
         },
 
+        # ── 3. Color Analysis (full tables) ───────────────────────────────
         'color_analysis': {
-            'mean_de00'        : result.get('mean_de00',             0),
-            'csi_value'        : result.get('csi_value',             0),
-            'de_statistics'    : result.get('de_statistics',         {}),
-            'color_regions'    : result.get('color_regions',         []),
-            'color_averages'   : result.get('color_averages',        {}),
-            'illuminant_data'  : result.get('illuminant_data',       []),
-            'sampling_radius'  : result.get('color_sampling_radius', 0),
-            'sampling_points'  : result.get('color_sampling_points', []),
+            'mean_de00'         : result.get('mean_de00',              0),
+            'csi_value'         : result.get('csi_value',              0),
+            'sampling_radius_px': result.get('color_sampling_radius',  0),
+            'sampling_count'    : result.get('color_sampling_count',   0),
+            'sampling_points'   : result.get('color_sampling_points',  []),
+            # Per-point table: id, pos, radius, ΔE76/94/00, status,
+            # Lab*/RGB/XYZ/CMYK/RGB-std for ref and sample
+            'color_regions'     : result.get('color_regions',          []),
+            # Summary averages across all sampled points
+            'color_averages'    : result.get('color_averages',         {}),
+            # ΔE76/94/00 mean/std/min/max
+            'de_statistics'     : result.get('de_statistics',          {}),
+            # Lab* detailed analysis: ΔL*, Δa*, Δb*, magnitude, thresholds, status
+            'lab_analysis'      : result.get('lab_analysis',           {}),
+            # Multi-illuminant table
+            'illuminant_data'   : result.get('illuminant_data',        []),
         },
 
+        # ── 4. Pattern Analysis (full tables) ─────────────────────────────
         'pattern_analysis': {
-            'composite_score'   : result.get('pattern_composite',    0),
-            'final_status'      : result.get('pattern_final_status', ''),
-            'individual_scores' : result.get('pattern_scores',       {}),
-            'structural_meta'   : result.get('structural_meta',      {}),
+            'composite_score'  : result.get('pattern_composite',    0),
+            'final_status'     : result.get('pattern_final_status', ''),
+            # Individual metric scores: SSIM, Gradient, Phase, Structural
+            'individual_scores': result.get('pattern_scores',       {}),
+            # Per-metric: score + pass/cond/fail thresholds + status
+            'metric_details'   : result.get('pattern_details',      {}),
+            # Structural diff: similarity, change %, pixel counts
+            'structural_meta'  : result.get('structural_meta',      {}),
         },
 
+        # ── 5. Fourier Spectral Analysis ───────────────────────────────────
         'fourier_analysis': result.get('fourier_data', {}),
 
+        # ── 6. GLCM Texture Analysis ───────────────────────────────────────
         'glcm_analysis': result.get('glcm_data', {}),
 
+        # ── 7. Alignment ───────────────────────────────────────────────────
         'alignment': {
             'mode'   : result.get('alignment_mode', mode),
             'metrics': result.get('alignment_metrics', {}),
         },
 
+        # ── 8. Recommendations & Conclusions ──────────────────────────────
         'recommendations': {
             'color_findings'            : result.get('color_findings',            []),
             'color_conclusion'          : result.get('color_conclusion_text',     ''),
@@ -394,31 +446,16 @@ def _build_data_json(result, mode, label, duration, ref_name, sample_name,
             'pattern_conclusion_status' : result.get('pattern_conclusion_status', ''),
         },
 
+        # ── 9. All test settings used ──────────────────────────────────────
         'settings_used': settings if settings is not None else {},
 
+        # ── 10. Region / crop data ─────────────────────────────────────────
         'region_data': region_data if region_data is not None else {},
 
-        'raw_api_fields': {
+        # ── 11. Catch-all: any API field not explicitly mapped above ───────
+        'extra_api_fields': {
             k: v for k, v in result.items()
-            if k not in _url_fields
-            and k not in {
-                'success', 'session_id',
-                'color_score', 'pattern_score', 'overall_score', 'decision',
-                'color_status', 'pattern_status',
-                'color_scoring_method', 'color_method_label',
-                'pattern_scoring_method', 'pattern_method_label',
-                'mean_de00', 'csi_value',
-                'de_statistics', 'color_regions', 'color_averages', 'illuminant_data',
-                'pattern_composite', 'pattern_final_status', 'pattern_scores', 'structural_meta',
-                'alignment_mode', 'alignment_metrics',
-                'fourier_data', 'glcm_data',
-                'color_sampling_radius', 'color_sampling_points',
-                'color_findings', 'color_conclusion_text', 'color_conclusion_status',
-                'pattern_findings', 'pattern_conclusion_text', 'pattern_conclusion_status',
-                'report_id', 'report_date', 'report_time', 'operator',
-                'report_size', 'color_report_size', 'pattern_report_size',
-                'fn_full', 'fn_color', 'fn_pattern', 'fn_receipt',
-            }
+            if k not in _url_fields and k not in _mapped
         },
     }
     return doc
